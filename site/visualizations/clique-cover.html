@@ -1,0 +1,51 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>3-CNF-SAT → CLIQUE → VERTEX-COVER | ENEE 641</title>
+<link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script><style>
+.lab{max-width:1120px;margin:auto;padding:40px 18px 100px}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:20px 0}p{line-height:1.65}
+.panel{background:var(--surface,#1e293b);color:var(--text,#e2e8f0);border:1px solid var(--line,#64748b);border-radius:15px;padding:20px;margin:16px 0}.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,1fr);gap:18px}
+svg{width:100%;background:#101d30;border-radius:12px}.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:12px 0}
+select,button{background:#20334c;color:#fff;border:1px solid #a0aec0;border-radius:9px;padding:10px;cursor:pointer}button:focus-visible,select:focus-visible{outline:3px solid #fde68a;outline-offset:3px}
+output{display:block;padding:13px;min-height:40px;border:1px solid #60748b;border-radius:8px;line-height:1.5}
+.key{display:flex;flex-wrap:wrap;gap:16px;font-size:.9rem}.key b{font-size:1.2rem}.note{border-left:3px solid #2dd4bf;padding:8px 15px}
+@media(max-width:790px){.layout{grid-template-columns:1fr}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course home</a><a href="#proof">Reduction proof</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main id="main" class="lab"><div class="section-label">CHAPTER 34 / NP-COMPLETENESS</div><h1>From clauses to graph witnesses.</h1><p>Explore two linked polynomial-time reductions. Each clause supplies three literal-vertices. Edges connect vertices from different clauses when their literals do not contradict. A 3-clique is equivalent to a satisfying choice of one literal per clause. Complementing the graph converts the CLIQUE question to VERTEX-COVER.</p>
+<div class="layout"><section class="panel"><div class="controls"><label for="graph-mode">Graph</label><select id="graph-mode"><option value="clique">3-CNF-SAT → CLIQUE</option><option value="cover">CLIQUE → VERTEX-COVER (complement)</option></select><button id="reset" type="button">Reset</button></div><svg id="graph" viewBox="0 0 660 480" role="img" aria-label="Original three-clause graph with edges and highlighted reduction witness"></svg><div class="key"><span><b style="color:#2dd4bf">●</b> Witness vertices</span><span><b style="color:#fbbf24">━</b> Witness clique edges</span><span>Grey lines: graph edges</span></div><p class="note" id="graph-caption"></p></section>
+<section class="panel"><h2>Truth assignment</h2><p>Change the variables; the selected clause witnesses update. A failed assignment does not imply the formula itself is unsatisfiable.</p>
+<div class="controls"><label for="x0">x₁</label><select id="x0"><option value="0">False</option><option value="1" selected>True</option></select>
+<label for="x1">x₂</label><select id="x1"><option value="0">False</option><option value="1" selected>True</option></select>
+<label for="x2">x₃</label><select id="x2"><option value="0">False</option><option value="1" selected>True</option></select></div>
+<p><strong>Original formula</strong></p><p>(x₁ ∨ ¬x₂ ∨ x₃)<br>(¬x₁ ∨ x₂ ∨ x₃)<br>(¬x₁ ∨ ¬x₂ ∨ ¬x₃)</p>
+<output id="verdict" aria-live="polite"></output><p id="witness"></p>
+<button id="show-global" type="button">Show a global clique witness</button><p id="global-result"></p></section></div>
+<section id="proof" class="panel"><h2>Proof: both directions matter</h2><p><strong>3-CNF-SAT → CLIQUE:</strong> Given a satisfying assignment, select a true literal from each clause. Their vertices connect pairwise because no variable can be simultaneously true and false. Conversely, a clique of size m (the number of clauses) chooses at most one vertex per clause, since same-clause vertices have no connecting edges. It therefore chooses exactly one from every clause. No two chosen literals contradict, so they can be extended into a satisfying assignment.</p>
+<p><strong>CLIQUE → VERTEX-COVER:</strong> For any graph G with n vertices, K is a clique of size k in G if and only if V\\K is a vertex cover of size n−k in the complement graph. If two excluded vertices were adjacent in the complement, they would be a missing edge in the original clique. The reverse direction follows by the same argument.</p>
+<p><strong>Polynomial growth:</strong> The clique instance contains one vertex per literal occurrence, with at most quadratically many edges; graph complementation checks at most n(n−1)/2 pairs. This is an original nine-vertex illustration, not a precise reproduction of the printed textbook figures.</p>
+<p><strong>Sources:</strong> ENEE 641, <em>Chapter34Nov5-2026.pptx</em>, Theorems 34.11 and 34.12; Cormen, Leiserson, Rivest, Stein, <em>Introduction to Algorithms</em>, Chapter 34, Figures 34.14–34.15 (conceptual reference only). Not an official UMD website.</p></section></main>
+<script type="module">
+import {clauses,reductionGraph,complementGraph,formulaSatisfied,selectedCompatible,findClique,isVertexCover} from './reduction-engine.js';
+const $=id=>document.getElementById(id), g=reductionGraph(clauses),cg=complementGraph(g),global=findClique(g,g.k);
+const ns='http://www.w3.org/2000/svg';
+let forceGlobal=false;
+const pos=g.vertices.map(v=>[120+210*v.clause,105+125*Number(v.id.split(':')[1])]);
+function add(tag,attrs,root){const el=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));root.append(el);return el}
+function label(v){return (v.positive?'':'¬')+'x'+(v.variable+1)}
+function render(){
+ const assignment=[0,1,2].map(i=>$('x'+i).value==='1'),sat=formulaSatisfied(clauses,assignment),mode=$('graph-mode').value;
+ const candidates=selectedCompatible(g,assignment), witness=forceGlobal?global:(sat?candidates:[]);
+ const cover=global?g.vertices.map((_,i)=>i).filter(i=>!global.includes(i)):[];
+ const highlighted=mode==='clique'?witness:cover,graph=mode==='clique'?g:cg;
+ const root=$('graph');root.replaceChildren();
+ const selected=new Set(highlighted);
+ graph.edges.forEach(([u,v])=>{const [x1,y1]=pos[u],[x2,y2]=pos[v];const edgeIsWitness=mode==='clique'&&selected.has(u)&&selected.has(v);
+ add('line',{x1,y1,x2,y2,stroke:edgeIsWitness?'#fbbf24':'#56657e','stroke-width':edgeIsWitness?5:1.7},root)});
+ g.vertices.forEach((v,i)=>{const [cx,cy]=pos[i],active=selected.has(i);const circ=add('circle',{cx,cy,r:27,fill:active?'#087f70':'#223653',stroke:active?'#9ff7eb':'#ced9e8','stroke-width':active?4:2},root);add('title',{},circ).textContent='Clause '+(v.clause+1)+', literal '+label(v);
+ const t=add('text',{x:cx,y:cy+5,fill:'#ffffff','font-size':16,'font-weight':'bold','text-anchor':'middle'},root);t.textContent=label(v)});
+ $('verdict').textContent='Current assignment: '+(sat?'satisfies':'does not satisfy')+' all three clauses. '+(sat?'One compatible literal per clause can be selected.':'A different assignment may satisfy the formula.');
+ $('witness').textContent=mode==='clique'?'Selected clique size: '+witness.length+'; target k = '+g.k+'.':'Complement vertex cover size: '+cover.length+'; target n−k = '+(g.vertices.length-g.k)+'; valid: '+isVertexCover(cg,cover)+'.';
+ $('graph-caption').textContent=mode==='clique'?'Only cross-clause, noncontradictory pairs receive edges.':'Complement graph: edges are exactly the nonedges of the original graph. The highlighted vertices are V minus a valid original clique.';
+ $('global-result').textContent=forceGlobal?'A global 3-clique exists even if the current assignment fails. The formula is satisfiable.':'';
+}
+['x0','x1','x2','graph-mode'].forEach(id=>$(id).addEventListener('change',()=>{forceGlobal=false;render()}));
+$('show-global').addEventListener('click',()=>{forceGlobal=true;render()});
+$('reset').addEventListener('click',()=>{['x0','x1','x2'].forEach(id=>$(id).value='1');$('graph-mode').value='clique';forceGlobal=false;render()});render();
+</script></body></html>
