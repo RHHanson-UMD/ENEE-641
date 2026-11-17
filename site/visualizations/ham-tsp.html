@@ -1,0 +1,46 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HAM-CYCLE to TSP | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1100px;padding:36px 20px 90px;margin:auto}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:18px 0}p{line-height:1.6}.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{background:var(--surface,#1e293b);color:var(--text,#f8fafc);border:1px solid var(--line,#64748b);border-radius:16px;padding:18px;margin:14px 0}svg{width:100%;background:#0f1e32;border-radius:12px}button,select{background:#253c59;color:#fff;padding:10px;border-radius:9px;border:1px solid #94a3b8;cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fde68a;outline-offset:3px}.edges{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.edges label{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid #64748b;border-radius:8px;cursor:pointer}output{display:block;padding:15px;border-radius:9px;border:1px solid #64748b;line-height:1.6} .legend{font-size:.9rem}@media(max-width:780px){.cols{grid-template-columns:1fr}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course home</a><a href="#proof">Proof</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main id="main" class="lab"><div class="section-label">CHAPTER 34 / NP-COMPLETENESS</div><h1>A tour with cost zero?</h1>
+<p>The polynomial-time reduction from HAM-CYCLE to decision TSP uses a <strong>complete</strong> graph. Original edges get weight 0; missing edges get weight 1. A tour with total cost at most 0 exists exactly when the original graph has a Hamiltonian cycle.</p>
+<div class="panel"><label for="preset">Start graph:</label> <select id="preset"><option value="cycle">Five-vertex cycle (YES)</option><option value="path">Five-vertex path (NO)</option><option value="star">Star (NO)</option></select> <button type="button" id="reset">Reset preset</button><div class="edges" id="edge-controls" aria-label="Toggle edges in the original undirected graph"></div></div>
+<div class="cols"><section class="panel"><h2>Original graph G</h2><svg id="original" viewBox="0 0 400 330" role="img" aria-label="Original graph with optional Hamiltonian cycle highlighted"></svg><p class="legend">Teal: best tour edges already present in the original graph. Grey: other original edges.</p></section>
+<section class="panel"><h2>Complete TSP instance</h2><svg id="weighted" viewBox="0 0 400 330" role="img" aria-label="Complete weighted graph with zero-weight original edges and one-weight nonedges"></svg><p class="legend">Each edge is labeled 0 or 1. Amber edges form a minimum-cost tour.</p></section></div>
+<div class="panel"><output id="verdict" aria-live="polite"></output><p id="tour-detail"></p></div>
+<section id="proof" class="panel"><h2>Why the reduction is correct</h2><p><strong>Forward:</strong> If the original graph G has a Hamiltonian cycle, the same cycle uses only original edges in the complete weighted graph. Every selected edge has cost 0, so the tour costs 0.</p><p><strong>Reverse:</strong> A TSP tour has n edges, each with nonnegative cost 0 or 1. If its total is at most 0, every tour edge must cost 0. Each is therefore an edge of G, making the tour a Hamiltonian cycle in G.</p><p><strong>Complexity:</strong> Creating all n(n−1)/2 edges and assigning weights is polynomial. The exhaustive exact tour search used here is only for the small interactive demonstration; it is <em>not</em> the reduction algorithm and does not prove TSP can be solved efficiently.</p><p><strong>Source:</strong> ENEE 641, <em>Chapter34Nov5-2026.pptx</em>, HAM-CYCLE ≤ₚ TSP, Theorem 34.14 (TSP NP-completeness). Graphs are new illustrative examples, not textbook reproductions.</p></section></main>
+<script type="module">
+import {analyzeHamTsp,allPairs,edgeKey} from './ham-tsp-engine.js';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';
+const points=[[200,35],[355,145],[295,300],[105,300],[45,145]];
+const presets={
+ cycle:[[0,1],[1,2],[2,3],[3,4],[4,0]],
+ path:[[0,1],[1,2],[2,3],[3,4]],
+ star:[[0,1],[0,2],[0,3],[0,4]]
+};
+let edges=[];
+function el(tag,attrs,parent){const n=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));parent.append(n);return n}
+function reset(){edges=presets[$('preset').value].map(e=>[...e]);controls();draw()}
+function controls(){$('edge-controls').replaceChildren();allPairs(5).forEach(([u,v])=>{
+ const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=edges.some(e=>edgeKey(...e)===edgeKey(u,v));
+ input.setAttribute('aria-label','Include original edge '+(u+1)+'–'+(v+1));
+ input.addEventListener('change',()=>{edges=input.checked?[...edges,[u,v]]:edges.filter(e=>edgeKey(...e)!==edgeKey(u,v));draw()});
+ label.append(input,document.createTextNode((u+1)+'–'+(v+1)));$('edge-controls').append(label);
+})}
+function draw(){
+ const result=analyzeHamTsp(5,edges),allowed=new Set(edges.map(e=>edgeKey(...e))),best=new Set(result.bestTour.map((u,i)=>edgeKey(u,result.bestTour[(i+1)%5])));
+ const original=$('original'),weighted=$('weighted');original.replaceChildren();weighted.replaceChildren();
+ for(const [u,v] of allPairs(5)){
+  const [x1,y1]=points[u],[x2,y2]=points[v],key=edgeKey(u,v),weight=allowed.has(key)?0:1;
+  if(weight===0)el('line',{x1,y1,x2,y2,stroke:best.has(key)?'#2dd4bf':'#62748c','stroke-width':best.has(key)?6:3},original);
+  el('line',{x1,y1,x2,y2,stroke:best.has(key)?'#fbbf24':'#586980','stroke-width':best.has(key)?5:2},weighted);
+  const x=(x1+x2)/2,y=(y1+y2)/2,tag=el('text',{x,y,fill:best.has(key)?'#fbbf24':'#f8fafc','font-size':17,'font-weight':'bold','text-anchor':'middle'},weighted);tag.textContent=weight;
+ }
+ for(const root of [original,weighted])points.forEach(([cx,cy],i)=>{
+  el('circle',{cx,cy,r:20,fill:'#21425f',stroke:'#f1f5f9','stroke-width':2},root);
+  const text=el('text',{x:cx,y:cy+6,fill:'white','text-anchor':'middle','font-size':18},root);text.textContent=i+1;
+ });
+ $('verdict').textContent='Minimum TSP tour cost = '+result.bestCost+'. With decision bound k = 0, answer is '+(result.bestCost===0?'YES: G has a Hamiltonian cycle.':'NO: every tour needs at least one nonedge.') ;
+ $('tour-detail').textContent='Best tour: '+[...result.bestTour,result.bestTour[0]].map(x=>x+1).join(' → ')+'. Number of original edges: '+result.edgeCount+'/10. This small example is solved by exhaustive enumeration.';
+}
+$('preset').addEventListener('change',reset);$('reset').addEventListener('click',reset);reset();
+</script></body></html>
