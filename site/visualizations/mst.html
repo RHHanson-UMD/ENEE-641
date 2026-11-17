@@ -1,0 +1,38 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Minimum spanning trees | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1120px;margin:auto;padding:38px 18px 80px}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:16px 0}p{line-height:1.65}.panel{background:var(--surface,#1e293b);color:var(--text,#f1f5f9);border:1px solid var(--line,#64748b);border-radius:15px;padding:20px;margin:17px 0}.cols{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:12px 0}select,button{background:#223b58;color:#fff;padding:10px;border-radius:8px;border:1px solid #94a3b8;cursor:pointer}button:disabled{opacity:.5}select:focus-visible,button:focus-visible{outline:3px solid #fcd34d;outline-offset:3px}
+svg{width:100%;background:#111f33;border-radius:10px}output{display:block;border:1px solid #64748b;padding:12px;border-radius:9px;margin:10px 0;line-height:1.6}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stats div{border:1px solid #66778d;padding:10px;border-radius:8px}
+@media(max-width:780px){.cols{grid-template-columns:1fr}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course</a><a href="#proof">Proof</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main id="main" class="lab"><div class="section-label">CHAPTER 23 / MINIMUM SPANNING TREES</div><h1>Build the same minimum tree two ways.</h1><p>Kruskal chooses low-weight edges and skips those that close a cycle. Prim grows a connected visited set by taking its lightest outgoing edge. Compare their steps and final minimum weights.</p>
+<section class="panel"><div class="controls"><label for="example">Graph</label><select id="example"><option value="weighted">Six-vertex weighted graph</option><option value="tied">Equal-weight cycle (multiple MSTs)</option><option value="bridge">Graph with a bridge</option></select><label for="algorithm">Algorithm</label><select id="algorithm"><option value="kruskal">Kruskal</option><option value="prim">Prim</option></select><button id="prev" type="button">Previous</button><button id="next" type="button">Next</button><button id="last" type="button">Final</button><button id="reset" type="button">Reset</button></div><output id="state" aria-live="polite"></output></section>
+<div class="cols"><section class="panel"><h2>Weighted undirected graph</h2><svg id="graph" viewBox="0 0 520 385" role="img" aria-label="Weighted graph with selected MST edges and currently considered edge highlighted"></svg><p>Teal: accepted edges. Amber: edge under consideration (whether accepted or rejected). Grey: other edges.</p></section>
+<section class="panel"><h2>Current result</h2><div class="stats"><div>Selected edge count<strong id="edge-count" style="display:block;font-size:1.5rem">0</strong></div><div>Selected total weight<strong id="weight" style="display:block;font-size:1.5rem">0</strong></div></div><output id="compare" aria-live="polite"></output><h2>Decision explanation</h2><p id="decision"></p></section></div>
+<section class="panel" id="proof"><h2>The cut property</h2><p>For a connected undirected weighted graph, let A be a set of edges contained in some MST. If a cut respects A (none of the edges in A cross it), then adding a light edge crossing that cut is safe: there exists an MST containing the enlarged set. In the exchange proof, replacing a heavier crossing tree edge with that light edge preserves connectivity and cannot increase total weight.</p>
+<p><strong>Kruskal:</strong> The current connected components define a cut where an edge joining different components is eligible. Its edges are processed in nondecreasing order of weight. Union–find determines whether endpoints are already connected, preventing cycles.</p><p><strong>Prim:</strong> The visited vertices and unvisited vertices define the cut. Choosing the lightest crossing edge extends the MST while preserving the cut-property invariant. Both methods output exactly n−1 edges on a connected graph. Kruskal takes O(E log E), which is O(E log V) for a simple graph; heap-based Prim takes O(E log V) with a suitable binary heap implementation.</p>
+<p><strong>Source:</strong> ENEE 641 <em>Chapter23Oct8b-2026.pptx</em>, Theorem 23.1, cut property, Kruskal, Prim, and union–find. Original graphs, not source figure reproductions.</p></section></main>
+<script type="module">
+import {graphs,kruskal,prim,exactMstCost} from './mst-engine.js';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';
+const points=[[75,70],[260,35],[440,85],[115,300],[290,340],[440,290]];
+let graph,result,step=0;
+function svgEl(tag,attrs,root){const n=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));root.append(n);return n}
+function setup(){graph=graphs[$('example').value];result=$('algorithm').value==='kruskal'?kruskal(graph.n,graph.edges):prim(graph.n,graph.edges);step=0;draw()}
+function draw(){
+ const s=result.steps[step],edges=graph.edges,accepted=new Set(s.chosen||[]),focus=s.edge;
+ const root=$('graph');root.replaceChildren();
+ edges.forEach(([u,v,w],i)=>{
+  const [x1,y1]=points[u],[x2,y2]=points[v],chosen=accepted.has(i),focused=focus?.id===i;
+  svgEl('line',{x1,y1,x2,y2,stroke:focused?'#fbbf24':chosen?'#2dd4bf':'#64748b','stroke-width':focused?7:chosen?5:2},root);
+  const label=svgEl('text',{x:(x1+x2)/2,y:(y1+y2)/2-8,fill:'#ffffff','font-size':17,'font-weight':'bold','text-anchor':'middle'},root);label.textContent=w;
+ });
+ for(let i=0;i<graph.n;i++){const [cx,cy]=points[i];svgEl('circle',{cx,cy,r:24,fill:'#244762',stroke:'#fafafa','stroke-width':2},root);
+ const text=svgEl('text',{x:cx,y:cy+6,fill:'#ffffff','font-size':18,'text-anchor':'middle'},root);text.textContent=i+1;}
+ $('state').textContent=!focus?'Start with '+($('algorithm').value==='prim'?'vertex 1 in the tree.':'each vertex as a separate component.'):'Step '+step+': examine edge '+(focus.u+1)+'–'+(focus.v+1)+' (weight '+focus.w+'). '+(s.accepted?'Accept.':'Reject: endpoints are already connected.');
+ $('decision').textContent=focus? s.accepted?'The edge is safe by the cut property; the selected edges remain acyclic.':'Adding this edge would close a cycle, so Kruskal skips it.':'Advance to inspect the next edge decision.';
+ $('edge-count').textContent=accepted.size;$('weight').textContent=[...accepted].reduce((sum,i)=>sum+edges[i][2],0);
+ $('compare').textContent='Independent exact MST weight for this small graph: '+exactMstCost(graph.n,edges)+'. '+(step===result.steps.length-1?'Final algorithm weight: '+result.cost+'.':'Keep stepping to compare.');
+ $('prev').disabled=step===0;$('next').disabled=step===result.steps.length-1;$('last').disabled=step===result.steps.length-1;
+}
+$('algorithm').addEventListener('change',setup);$('example').addEventListener('change',setup);$('reset').addEventListener('click',setup);
+$('prev').addEventListener('click',()=>{step=Math.max(0,step-1);draw()});$('next').addEventListener('click',()=>{step=Math.min(result.steps.length-1,step+1);draw()});$('last').addEventListener('click',()=>{step=result.steps.length-1;draw()});setup();
+</script></body></html>
