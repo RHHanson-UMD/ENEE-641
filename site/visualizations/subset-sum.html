@@ -1,0 +1,39 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3-CNF-SAT to SUBSET-SUM | ENEE 641 Learning Lab</title>
+<meta name="description" content="Interactive 3-CNF-SAT to SUBSET-SUM reduction inspired by CLRS Figure 34.19.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../assets/styles.css"><link rel="stylesheet" href="./subset-sum.css">
+<script src="../assets/course.js" defer></script><script src="./subset-sum.js" type="module"></script></head>
+<body><a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="container nav-row"><a class="brand" href="../"><span class="brand-mark">RH<span>.</span></span><span class="brand-label"><strong>ENEE 641</strong><small>Algorithm Explorer</small></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="../">Course</a><a href="#explorer">Explorer</a><a href="#why">Why it works</a></nav>
+<div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">&#9790;</button><a class="nav-github" href="https://github.com/RHHanson-UMD/ENEE-641" target="_blank" rel="noopener noreferrer">Source &nearr;</a></div></div></header>
+<main id="main"><section class="viz-intro"><div class="container"><div class="section-label">ENEE 641 / CHAPTER 34 / INTERACTIVE REDUCTIONS</div>
+<h1>From logic <span>to arithmetic.</span></h1><p>Explore how a satisfying assignment for a 3-CNF formula becomes a subset of decimal numbers with an exact target sum.</p>
+<div class="context-line"><span>3-CNF-SAT</span><span aria-hidden="true">&rarr;</span><span>SUBSET-SUM</span><span class="context-muted">Figure 34.19-inspired construction</span></div></div></section>
+<section class="viz-workspace" id="explorer"><div class="container"><div class="workspace-header"><div><div class="section-label">01 / EXPERIMENT</div><h2>Change the truth assignment.</h2><p>Each variable chooses one of two seven-digit numbers. Slack values attempt to finish each clause column.</p></div><button class="reset-button" id="reset-assignment" type="button">Reset textbook example</button></div>
+<div class="control-grid"><fieldset class="assignment-card"><legend>Variable assignments</legend><div class="assignment-fields">
+<label>x<sub>1</sub><select id="input-0"><option value="0" selected>0 - False</option><option value="1">1 - True</option></select></label>
+<label>x<sub>2</sub><select id="input-1"><option value="0" selected>0 - False</option><option value="1">1 - True</option></select></label>
+<label>x<sub>3</sub><select id="input-2"><option value="0">0 - False</option><option value="1" selected>1 - True</option></select></label>
+</div><p>0 = false; 1 = true. A number for each variable is included automatically.</p></fieldset>
+<div class="assignment-result"><div class="result-kicker">SUBSET-SUM VERIFIER</div><div class="result-state" id="result-state" role="status" aria-live="polite">Target reached</div><div class="result-number" id="result-number">1114444</div><div class="result-target">Target <strong>1114444</strong></div></div></div>
+<div class="viz-layout"><div class="math-table-panel"><div class="panel-head"><div><h3>Constructed numbers</h3><p>Digits correspond to x1, x2, x3, C1, C2, C3, C4.</p></div><label class="inline-toggle"><input type="checkbox" id="show-all" checked> Show all numbers</label></div>
+<div class="digit-table-wrapper"><table class="digit-table"><thead><tr><th scope="col">Number</th><th scope="col">x<sub>1</sub></th><th scope="col">x<sub>2</sub></th><th scope="col">x<sub>3</sub></th><th scope="col">C<sub>1</sub></th><th scope="col">C<sub>2</sub></th><th scope="col">C<sub>3</sub></th><th scope="col">C<sub>4</sub></th></tr></thead>
+<tbody id="number-rows"></tbody><tfoot><tr class="sum-row"><th scope="row">Selected sum</th><td id="sum-0">1</td><td id="sum-1">1</td><td id="sum-2">1</td><td id="sum-3">4</td><td id="sum-4">4</td><td id="sum-5">4</td><td id="sum-6">4</td></tr><tr class="target-row"><th scope="row">Target</th><td>1</td><td>1</td><td>1</td><td>4</td><td>4</td><td>4</td><td>4</td></tr></tfoot></table></div>
+<div class="table-foot"><span><i class="legend-square"></i> Included in the subset</span><span>All values are base 10; no carries occur.</span></div></div>
+<div class="clause-panel"><div class="panel-head"><div><h3>The original formula</h3><p>All four clauses must be true.</p></div></div><div class="formula-list">
+<div class="formula-item"><div><span class="formula-label">C<sub>1</sub></span><span>x<sub>1</sub> &or; &not;x<sub>2</sub> &or; &not;x<sub>3</sub></span></div><span class="clause-value" id="clause-0">1</span></div>
+<div class="formula-item"><div><span class="formula-label">C<sub>2</sub></span><span>&not;x<sub>1</sub> &or; &not;x<sub>2</sub> &or; &not;x<sub>3</sub></span></div><span class="clause-value" id="clause-1">1</span></div>
+<div class="formula-item"><div><span class="formula-label">C<sub>3</sub></span><span>&not;x<sub>1</sub> &or; &not;x<sub>2</sub> &or; x<sub>3</sub></span></div><span class="clause-value" id="clause-2">1</span></div>
+<div class="formula-item"><div><span class="formula-label">C<sub>4</sub></span><span>x<sub>1</sub> &or; x<sub>2</sub> &or; x<sub>3</sub></span></div><span class="clause-value" id="clause-3">1</span></div></div>
+<div class="gate-summary"><div class="gate-caption">CIRCUIT INTERPRETATION</div><div class="logic-gates"><span class="gate-chip" id="gate-0">OR 1</span><span class="gate-chip" id="gate-1">OR 1</span><span class="gate-chip" id="gate-2">OR 1</span><span class="gate-chip" id="gate-3">OR 1</span><span class="gate-arrow">&rarr;</span><span class="gate-final" id="final-gate">AND 1</span></div><p>Each clause is an OR gate; their outputs feed one AND gate.</p></div>
+<div class="insight-box"><h4>What changed?</h4><p id="explanation">Each clause is satisfied. Slack numbers fill the difference to 4.</p></div>
+</div></div>
+</div></section>
+<section class="course-section alt" id="why"><div class="container"><div class="section-label">02 / UNDERSTAND THE PROOF</div><h2>Why the construction works<span class="period">.</span></h2><div class="proof-grid"><article><span class="proof-number">01</span><h3>Choose one literal per variable</h3><p>The first three target digits are 1. Each truth assignment includes exactly one corresponding variable number.</p></article>
+<article><span class="proof-number">02</span><h3>Use slack to reach 4</h3><p>A satisfied clause has 1, 2, or 3 true literals. Slack numbers worth 1 and 2 can fill the remaining amount.</p></article>
+<article><span class="proof-number">03</span><h3>Detect an unsatisfied clause</h3><p>A false clause starts at 0. Its two slack values sum to at most 3, so that clause digit cannot reach the target 4.</p></article></div>
+<div class="proof-conclusion">The formula is satisfiable <strong>if and only if</strong> some subset sums to 1114444. Every digit can be checked independently because the construction prevents decimal carries.</div>
+<p class="attribution">Independent interactive teaching example inspired by Cormen, Leiserson, Rivest, and Stein, <em>Introduction to Algorithms</em>, 3rd ed., Figure 34.19. No original textbook figure is reproduced.</p></div></section></main>
+<footer><div class="container footer-row"><div class="footer-brand"><span class="brand-mark">RH<span>.</span></span><span>Independent educational project.<br>Not an official UMD or textbook website.</span></div><div class="footer-links"><a href="../">ENEE 641</a><a href="https://rhhanson-umd.github.io/">All courses</a></div></div></footer>
+</body></html>
