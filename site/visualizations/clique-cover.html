@@ -11,9 +11,9 @@ output{display:block;padding:13px;min-height:40px;border:1px solid #60748b;borde
 <main id="main" class="lab"><div class="section-label">CHAPTER 34 / NP-COMPLETENESS</div><h1>From clauses to graph witnesses.</h1><p>Explore two linked polynomial-time reductions. Each clause supplies three literal-vertices. Edges connect vertices from different clauses when their literals do not contradict. A 3-clique is equivalent to a satisfying choice of one literal per clause. Complementing the graph converts the CLIQUE question to VERTEX-COVER.</p>
 <div class="layout"><section class="panel"><div class="controls"><label for="graph-mode">Graph</label><select id="graph-mode"><option value="clique">3-CNF-SAT → CLIQUE</option><option value="cover">CLIQUE → VERTEX-COVER (complement)</option></select><button id="reset" type="button">Reset</button></div><svg id="graph" viewBox="0 0 660 480" role="img" aria-label="Original three-clause graph with edges and highlighted reduction witness"></svg><div class="key"><span><b style="color:#2dd4bf">●</b> Witness vertices</span><span><b style="color:#fbbf24">━</b> Witness clique edges</span><span>Grey lines: graph edges</span></div><p class="note" id="graph-caption"></p></section>
 <section class="panel"><h2>Truth assignment</h2><p>Change the variables; the selected clause witnesses update. A failed assignment does not imply the formula itself is unsatisfiable.</p>
-<div class="controls"><label for="x0">x₁</label><select id="x0"><option value="0">False</option><option value="1" selected>True</option></select>
-<label for="x1">x₂</label><select id="x1"><option value="0">False</option><option value="1" selected>True</option></select>
-<label for="x2">x₃</label><select id="x2"><option value="0">False</option><option value="1" selected>True</option></select></div>
+<div class="controls"><label for="x0">x₁</label><select id="x0"><option value="0" selected>False</option><option value="1">True</option></select>
+<label for="x1">x₂</label><select id="x1"><option value="0" selected>False</option><option value="1">True</option></select>
+<label for="x2">x₃</label><select id="x2"><option value="0" selected>False</option><option value="1">True</option></select></div>
 <p><strong>Original formula</strong></p><p>(x₁ ∨ ¬x₂ ∨ x₃)<br>(¬x₁ ∨ x₂ ∨ x₃)<br>(¬x₁ ∨ ¬x₂ ∨ ¬x₃)</p>
 <output id="verdict" aria-live="polite"></output><p id="witness"></p>
 <button id="show-global" type="button">Show a global clique witness</button><p id="global-result"></p></section></div>
@@ -47,5 +47,5 @@ function render(){
 }
 ['x0','x1','x2','graph-mode'].forEach(id=>$(id).addEventListener('change',()=>{forceGlobal=false;render()}));
 $('show-global').addEventListener('click',()=>{forceGlobal=true;render()});
-$('reset').addEventListener('click',()=>{['x0','x1','x2'].forEach(id=>$(id).value='1');$('graph-mode').value='clique';forceGlobal=false;render()});render();
+$('reset').addEventListener('click',()=>{['x0','x1','x2'].forEach(id=>$(id).value='0');$('graph-mode').value='clique';forceGlobal=false;render()});render();
 </script></body></html>
