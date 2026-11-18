@@ -1,0 +1,42 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Chapter 22 Graph Traversal | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1140px;margin:auto;padding:36px 18px 100px}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:17px 0}p{line-height:1.65}.panel{background:var(--surface,#1e293b);color:var(--text,#f8fafc);border:1px solid var(--line,#64748b);border-radius:15px;padding:20px;margin:16px 0}
+.cols{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:12px 0}select,button{background:#253d59;color:#fff;border:1px solid #94a3b8;border-radius:9px;padding:10px;cursor:pointer}button:disabled{opacity:.5}button:focus-visible,select:focus-visible{outline:3px solid #fcd34d;outline-offset:3px}
+svg{width:100%;background:#101d30;border-radius:10px}table{width:100%;border-collapse:collapse}th,td{padding:9px;border:1px solid #728197;text-align:center}output{display:block;padding:12px;border-radius:8px;border:1px solid #728197;margin:12px 0;line-height:1.5}.queue{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.queue span{display:inline-block;background:#1e5b69;color:white;padding:8px 12px;border-radius:6px}
+@media(max-width:790px){.cols{grid-template-columns:1fr}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course</a><a href="#proof">Proof</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main class="lab" id="main"><div class="section-label">CHAPTER 22 / ELEMENTARY GRAPH ALGORITHMS</div><h1>What the queue knows.</h1><p>Switch between breadth-first search (BFS) on an undirected graph and topological sorting on a directed acyclic graph. Each step records the work queue, discovered vertices, and changes to distance or indegree.</p>
+<section class="panel"><div class="controls"><label for="mode">Algorithm</label><select id="mode"><option value="bfs">Breadth-first search</option><option value="topo">Topological sort (zero-indegree peeling)</option></select><button id="prev" type="button">Previous</button><button id="next" type="button">Next</button><button id="last" type="button">Final</button><button id="reset" type="button">Reset</button></div><output id="status" aria-live="polite"></output></section>
+<div class="cols"><section class="panel"><h2>Graph and state</h2><svg id="graph" viewBox="0 0 520 390" role="img" aria-label="Graph with most recently processed vertices and discovered edges highlighted"></svg><h3>Queue (front first)</h3><div id="queue" class="queue" aria-label="Current queue"></div><p id="summary"></p></section>
+<section class="panel"><h2>Distances / indegrees</h2><table id="table"><caption>Current state after this operation</caption></table><h3>Traversal record</h3><output id="record" aria-live="polite"></output></section></div>
+<section class="panel" id="proof"><h2>Why the approaches work</h2><p><strong>BFS:</strong> The FIFO queue processes vertices in nondecreasing distance from the source. On first discovery, setting d[v] = d[u]+1 records a path with that number of edges. Any shorter path would have first reached v from an earlier queue layer, a contradiction. Thus final distances count the minimum number of edges. Adjacency-list BFS takes O(V+E).</p><p><strong>Topological peeling:</strong> A DAG always has a zero-indegree vertex. Removing one cannot invalidate any remaining precedence edge; repeating produces an ordering in which each directed edge u→v points forward. If vertices remain but none has indegree zero, those remaining vertices contain a directed cycle. This algorithm also takes O(V+E) with adjacency lists.</p><p>The original graphs are illustrative and not direct copies of the textbook slide figures. Source: ENEE 641 <em>Chapter22Oct15-2026.pptx</em>, BFS, shortest-path correctness, queue states and topological sorting by indegree peeling.</p></section></main>
+<script type="module">
+import {graphs,bfs,topologicalPeel} from './graph-traversal-engine.js';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';
+const pos=[[70,180],[185,65],[190,305],[320,115],[330,290],[460,190],[475,345]];
+let current,results,step=0;
+function mk(tag,attrs,root){const e=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));root.append(e);return e}
+function setup(){current=graphs[$('mode').value];results=$('mode').value==='bfs'?bfs(current.n,current.edges,0):topologicalPeel(current.n,current.edges);step=0;draw()}
+function draw(){
+ const mode=$('mode').value,s=results.states[step],root=$('graph');root.replaceChildren();
+ const active=mode==='bfs'?(s.vertex??-1):(s.removed??-1),newVertices=new Set(mode==='bfs'?s.newlyDiscovered:s.newlyZero);
+ const selectedEdges=mode==='bfs'?new Set((s.newlyDiscovered||[]).map(v=>[active,v].sort((a,b)=>a-b).join(':'))):new Set();
+ current.edges.forEach(([u,v])=>{
+  const [x1,y1]=pos[u],[x2,y2]=pos[v],isMarked=selectedEdges.has([u,v].sort((a,b)=>a-b).join(':')),color=isMarked?'#fbbf24':'#6d829c';
+  mk('line',{x1,y1,x2,y2,stroke:color,'stroke-width':isMarked?5:3},root);
+  if(mode==='topo'){const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy),ex=x2-dx/len*23,ey=y2-dy/len*23,nx=-dy/len,ny=dx/len;
+   mk('polyline',{points:(ex-dx/len*12+nx*6)+','+(ey-dy/len*12+ny*6)+' '+ex+','+ey+' '+(ex-dx/len*12-nx*6)+','+(ey-dy/len*12-ny*6),fill:'none',stroke:color,'stroke-width':2},root)}
+ });
+ for(let i=0;i<current.n;i++){const [cx,cy]=pos[i],highlight=i===active,discovered=newVertices.has(i);
+  mk('circle',{cx,cy,r:23,fill:highlight?'#d97706':discovered?'#0f766e':'#22435e',stroke:'#e2e8f0','stroke-width':2},root);
+  const label=mk('text',{x:cx,y:cy+6,fill:'#fff','font-size':19,'text-anchor':'middle'},root);label.textContent=i+1;}
+ $('status').textContent=step===0?'Initialization: place the starting vertex or all zero-indegree vertices into the FIFO queue.':mode==='bfs'?'Step '+step+': dequeue '+(active+1)+' and discover '+(s.newlyDiscovered.length?s.newlyDiscovered.map(v=>v+1).join(', '):'no new vertices')+'.':'Step '+step+': remove vertex '+(active+1)+' and decrement indegrees of its outgoing neighbors.';
+ $('queue').replaceChildren();if(!s.queue.length){const p=document.createElement('span');p.textContent='empty';$('queue').append(p)}s.queue.forEach(v=>{const item=document.createElement('span');item.textContent=v+1;$('queue').append(item)});
+ const table=$('table');table.replaceChildren();const header=document.createElement('tr');for(const name of ['Vertex',mode==='bfs'?'Distance':'Indegree',mode==='bfs'?'Parent':'Removed']){const th=document.createElement('th');th.textContent=name;header.append(th)}table.append(header);
+ for(let i=0;i<current.n;i++){const tr=document.createElement('tr'),data=[i+1,mode==='bfs'?(Number.isFinite(s.dist[i])?s.dist[i]:'∞'):s.indegree[i],mode==='bfs'?(s.parent[i]===null?'—':s.parent[i]+1):(s.order.includes(i)?'yes':'no')];
+  data.forEach(x=>{const td=document.createElement('td');td.textContent=x;tr.append(td)});table.append(tr)}
+ $('record').textContent=mode==='bfs'?'Processed order: '+(results.order.slice(0,step).map(x=>x+1).join(' → ')||'none')+'.':'Removal order: '+(s.order.map(x=>x+1).join(' → ')||'none')+'. '+(results.hasCycle?'A cycle prevents a full order.':'Every directed edge points forward in the final order.');
+ $('summary').textContent=step===results.states.length-1?'Traversal complete.':'The queue records vertices eligible for the next operation.';
+ $('prev').disabled=step===0;$('next').disabled=step===results.states.length-1;$('last').disabled=step===results.states.length-1;
+}
+$('mode').addEventListener('change',setup);$('prev').addEventListener('click',()=>{step=Math.max(0,step-1);draw()});$('next').addEventListener('click',()=>{step=Math.min(results.states.length-1,step+1);draw()});$('last').addEventListener('click',()=>{step=results.states.length-1;draw()});$('reset').addEventListener('click',setup);setup();
+</script></body></html>

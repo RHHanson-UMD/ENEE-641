@@ -1,0 +1,39 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2–3 Tree Insertion | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1150px;margin:auto;padding:38px 18px 100px}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:18px 0}p{line-height:1.6}.panel{background:var(--surface,#1e293b);border:1px solid var(--line,#64748b);color:var(--text,#f8fafc);border-radius:15px;padding:20px;margin:16px 0}.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}button,select,input{background:#233a56;color:white;border:1px solid #94a3b8;border-radius:9px;padding:10px}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fde68a;outline-offset:3px}.visual{overflow:auto;padding:28px 15px;background:#101d30;border-radius:11px;min-height:210px}.node{display:flex;flex-direction:column;align-items:center;min-width:max-content;gap:21px}.keys{display:inline-flex;border:2px solid #9de8df;background:#145c58;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px #0004}.keys span{color:white;min-width:44px;padding:12px 13px;font-weight:700;text-align:center}.keys span+span{border-left:1px solid #a5f3fc}.children{display:flex;justify-content:center;align-items:flex-start;gap:20px;border-top:1px dashed #64748b;padding-top:20px}.children>.node{position:relative}.children>.node:before{content:"";position:absolute;top:-20px;height:19px;border-left:2px solid #64748b}output{display:block;padding:13px;border:1px solid #64748b;border-radius:9px;margin:12px 0;line-height:1.6}#history li{margin:6px 0}
+@media(max-width:770px){.children{gap:10px}.keys span{min-width:36px;padding:9px}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course</a><a href="#proof">Invariant</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main id="main" class="lab"><div class="section-label">CHAPTER 18 SUBSTITUTE / 2–3 TREES</div><h1>When a node fills, a key rises.</h1><p>A 2–3 tree stores one or two keys in each node, every internal node has two or three children, and all leaves remain at the same depth. Insert keys and watch full nodes split and promote their middle keys upward.</p>
+<section class="panel"><div class="controls"><label for="preset">Sequence</label><select id="preset"><option value="balanced">1–15 in interleaved order</option><option value="ascending">Ascending 1–12</option><option value="short">Small 6-key example</option></select><button id="prev" type="button">Previous</button><button id="next" type="button">Insert next</button><button id="all" type="button">Build all</button><button id="reset" type="button">Reset</button></div>
+<div class="controls"><label for="new-key">Add a new integer</label><input id="new-key" type="number" step="1" value="16" style="max-width:115px"><button id="insert-custom" type="button">Append key</button></div>
+<output id="state" aria-live="polite"></output><p id="sequence"></p></section>
+<section class="panel"><h2>Current tree</h2><div class="visual" id="tree" role="img" aria-label="Nested balanced 2–3 search tree"></div><p id="metrics"></p><h2>Insertion events</h2><ol id="history"></ol></section>
+<section id="proof" class="panel"><h2>Why the tree remains balanced</h2><p>Insertion searches to a leaf, maintaining ordered key ranges. A two-key leaf can temporarily acquire a third key. Split the three into a left one-key node and right one-key node, and promote the middle key into the parent. If the parent overflows, repeat recursively. A root split creates a new root, increasing the height by one while keeping all leaves at the same depth.</p>
+<p><strong>Search and insert:</strong> every internal level has at least two children, so height grows logarithmically with the number of keys. Each insertion performs O(log n) local work, plus splits along at most one root-to-leaf path. This teaching tool implements <em>insertion</em> only; the lecture's deletion/redistribution illustrations are a separate future module.</p>
+<p><strong>Source:</strong> ENEE 641 <em>Chapter18substituteOct1-2026.pptx</em>, 2–3-tree insertion, split/absorb and O(log n) search and insertion. The tree diagrams here are generated independently, not transcribed from the slide-specific Insert(12)/Delete(4) examples.</p></section></main>
+<script type="module">
+import {build,validateTree} from './two-three-tree-engine.js';
+const $=id=>document.getElementById(id);
+const presets={balanced:[8,4,12,2,6,10,14,1,3,5,7,9,11,13,15],ascending:[1,2,3,4,5,6,7,8,9,10,11,12],short:[10,20,5,15,25,30]};
+let keys=[],states=[],step=0;
+function setup(){keys=[...presets[$('preset').value]];rebuild(0)}
+function rebuild(next){states=build(keys).states;step=Math.max(0,Math.min(next,keys.length));draw()}
+function makeNode(tree){
+ const outer=document.createElement('div');outer.className='node';
+ const keyBox=document.createElement('div');keyBox.className='keys';
+ tree.keys.forEach(k=>{const span=document.createElement('span');span.textContent=k;keyBox.append(span)});outer.append(keyBox);
+ if(tree.children.length){const children=document.createElement('div');children.className='children';tree.children.forEach(ch=>children.append(makeNode(ch)));outer.append(children)}
+ return outer;
+}
+function draw(){
+ const state=states[step],tree=state.tree,validation=validateTree(tree);
+ $('tree').replaceChildren();if(tree)$('tree').append(makeNode(tree));else $('tree').textContent='Empty tree — insert the first key.';
+ $('state').textContent=step===0?'Start with an empty tree.':'After inserting '+state.inserted+'. '+state.events.join(' ');
+ $('sequence').textContent='Insertion order: '+keys.map((key,i)=>i<step?'['+key+']':String(key)).join(' → ')+'. Brackets indicate completed insertions.';
+ $('metrics').textContent='Key count = '+validation.count+'; height = '+validation.height+' node level(s); invariant check = '+(validation.valid?'valid':'FAILED: '+validation.reason)+'.';
+ $('history').replaceChildren();state.events.forEach(e=>{const li=document.createElement('li');li.textContent=e;$('history').append(li)});
+ $('prev').disabled=step===0;$('next').disabled=step===keys.length;$('all').disabled=step===keys.length;
+}
+$('preset').addEventListener('change',setup);$('prev').addEventListener('click',()=>{step--;draw()});$('next').addEventListener('click',()=>{step++;draw()});$('all').addEventListener('click',()=>{step=keys.length;draw()});$('reset').addEventListener('click',setup);
+$('insert-custom').addEventListener('click',()=>{const key=Number($('new-key').value);if(!Number.isSafeInteger(key)){ $('state').textContent='Enter a valid integer.';return;}keys=keys.slice(0,step);keys.push(key);rebuild(keys.length)});
+setup();
+</script></body></html>
