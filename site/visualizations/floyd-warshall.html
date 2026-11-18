@@ -1,0 +1,44 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Floyd–Warshall | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1120px;margin:auto;padding:38px 18px 90px}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.14;margin:18px 0}p{line-height:1.65}.panel{background:var(--surface,#192a3c);color:var(--text,#f1f5f9);border:1px solid var(--line,#64748b);border-radius:14px;padding:20px;margin:18px 0}.layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);gap:18px}
+button,select,input{background:#233b56;color:white;padding:9px 12px;border:1px solid #94a3b8;border-radius:9px}button{cursor:pointer}button:disabled{opacity:.5;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #fde68a;outline-offset:3px}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:12px 0}
+.matrix{width:100%;border-collapse:separate;border-spacing:5px;text-align:center}.matrix th,.matrix td{border:1px solid #718096;padding:12px 7px;border-radius:6px}.matrix th{font-weight:600}.matrix td.changed{background:#146f5f;color:white}.matrix td.via{outline:3px solid #fbbf24}
+svg{width:100%;background:#112038;border-radius:10px}output{display:block;min-height:45px;padding:12px;border:1px solid #64748b;border-radius:9px;line-height:1.5}
+@media(max-width:770px){.layout{grid-template-columns:1fr}.matrix th,.matrix td{padding:10px 5px}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course</a><a href="#proof">Proof</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main id="main" class="lab"><div class="section-label">CHAPTER 25 / ALL-PAIRS SHORTEST PATHS</div><h1>Floyd–Warshall, one intermediary at a time.</h1><p>At iteration k, every shortest path is allowed to use the first k vertices as internal intermediate vertices. Advance the recursion and inspect exactly which distance entries improve. This is an original illustration, not the book's Figure 25.1.</p>
+<div class="panel"><div class="controls"><label for="graph-example">Graph</label><select id="graph-example"><option value="negative">Negative edge, no negative cycle</option><option value="positive">Positive weights</option><option value="disconnected">Disconnected vertex</option></select>
+<button type="button" id="prev">Previous k</button><button type="button" id="next">Next k</button><button type="button" id="all">Final</button><button type="button" id="reset">Reset</button></div><output id="stage-status" aria-live="polite"></output></div>
+<div class="layout"><section class="panel"><h2>Distance matrix D⁽ᵏ⁾</h2><table class="matrix" id="matrix"><caption>Rows are source vertices; columns are destinations</caption></table><p>Green cells improved in this iteration. The amber outline indicates the currently selected source–destination pair.</p><h2>Path query</h2><div class="controls"><label for="source">From</label><select id="source"></select><label for="target">To</label><select id="target"></select></div><output id="path-output" aria-live="polite"></output></section>
+<section class="panel"><h2>Directed weighted graph</h2><svg id="graph" viewBox="0 0 430 360" role="img" aria-label="Weighted directed graph with the selected shortest path highlighted"></svg><p>Amber edges belong to the current shortest path. Other arcs are grey. An unreachable vertex pair has distance ∞ and no path.</p><h2>Current updates</h2><ol id="updates"></ol></section></div>
+<section id="proof" class="panel"><h2>The dynamic programming recurrence</h2><p><strong>D⁽ᵏ⁾[i,j] = min(D⁽ᵏ⁻¹⁾[i,j], D⁽ᵏ⁻¹⁾[i,k] + D⁽ᵏ⁻¹⁾[k,j]).</strong> A shortest path using intermediates from the first k vertices either avoids vertex k, or reaches it and then continues to its destination. This gives optimal substructure.</p><p><strong>Invariant:</strong> After stage k, D⁽ᵏ⁾[i,j] is the shortest distance among all i→j paths whose internal vertices belong to {1,…,k}. In the presence of a negative-weight cycle, shortest walk distances may be unbounded below, so this lesson uses graphs without negative cycles. Negative edges themselves are allowed.</p><p><strong>Time:</strong> O(n³) for n iterations of n² source–destination pairs. The implementation also stores snapshots for teaching; this adds O(n³) space, while a standard in-place algorithm uses O(n²) space.</p><p><strong>Source:</strong> ENEE 641 <em>Chapter25Nov3-2026.pptx</em>, Floyd–Warshall iteration, predecessor matrix, correctness invariant, and complexity; CLRS Chapter 25. No copyrighted figure reproduced.</p></section></main>
+<script type="module">
+import {floydWarshall,reconstructPath,examples} from './floyd-warshall-engine.js';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';
+const positions=[[215,40],[375,165],[220,315],[55,165]];
+let model,stage=0;
+function svgEl(tag,attrs,root){const n=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));root.append(n);return n}
+const fmt=v=>v===Infinity?'∞':String(v);
+function setup(){model=floydWarshall(examples[$('graph-example').value]);stage=0;for(const name of ['source','target']){$(name).replaceChildren();for(let i=0;i<4;i++){const op=document.createElement('option');op.value=i;op.textContent=i+1;$(name).append(op)}}$('source').value='0';$('target').value='3';draw()}
+function draw(){
+ const s=model.stages[stage],u=Number($('source').value),v=Number($('target').value),path=reconstructPath(s,u,v),matrix=$('matrix');
+ matrix.replaceChildren();const head=document.createElement('tr');head.append(document.createElement('th'));for(let j=0;j<4;j++){const th=document.createElement('th');th.scope='col';th.textContent=j+1;head.append(th)}matrix.append(head);
+ for(let i=0;i<4;i++){const row=document.createElement('tr'),th=document.createElement('th');th.scope='row';th.textContent=i+1;row.append(th);
+ for(let j=0;j<4;j++){const td=document.createElement('td');td.textContent=fmt(s.dist[i][j]);if(s.updates.some(x=>x.i===i&&x.j===j))td.classList.add('changed');if(i===u&&j===v)td.classList.add('via');row.append(td)}matrix.append(row)}
+ $('stage-status').textContent=stage===0?'Initial direct-edge distances D⁽⁰⁾: no intermediate vertices permitted.':'After iteration k = '+stage+': intermediate vertices may be drawn from {1,…,'+stage+'}. '+s.updates.length+' matrix entries improved.';
+ $('path-output').textContent=path.length?'Shortest currently permitted path: '+path.map(x=>x+1).join(' → ')+'. Distance: '+fmt(s.dist[u][v])+'.':'No path exists using the currently permitted intermediate vertices.';
+ $('prev').disabled=stage===0;$('next').disabled=stage===4;$('all').disabled=stage===4;
+ $('updates').replaceChildren();if(!s.updates.length){const li=document.createElement('li');li.textContent='No improvements this iteration.';$('updates').append(li)}
+ s.updates.forEach(x=>{const li=document.createElement('li');li.textContent=(x.i+1)+' → '+(x.j+1)+': '+fmt(x.old)+' becomes '+fmt(x.value)+' via '+(x.via+1);$('updates').append(li)});
+ const root=$('graph');root.replaceChildren();const original=examples[$('graph-example').value],selected=new Set(path.slice(0,-1).map((x,i)=>x+':'+path[i+1]));
+ original.forEach((row,i)=>row.forEach((w,j)=>{if(i===j||!Number.isFinite(w))return;
+ const [x1,y1]=positions[i],[x2,y2]=positions[j],dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy),ex=x2-dx/len*24,ey=y2-dy/len*24,sx=x1+dx/len*24,sy=y1+dy/len*24,hit=selected.has(i+':'+j);
+ svgEl('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:hit?'#fbbf24':'#7f90a8','stroke-width':hit?5:2},root);
+ const px=ex-dx/len*13,py=ey-dy/len*13,nx=-dy/len,ny=dx/len;
+ svgEl('polyline',{points:[px+nx*6+','+(py+ny*6),ex+','+ey,px-nx*6+','+(py-ny*6)].join(' '),fill:'none',stroke:hit?'#fbbf24':'#7f90a8','stroke-width':2},root);
+ const label=svgEl('text',{x:(x1+x2)/2+nx*13,y:(y1+y2)/2+ny*13,fill:'#f8fafc','font-size':16,'text-anchor':'middle'},root);label.textContent=w;
+ }));
+ positions.forEach(([cx,cy],i)=>{svgEl('circle',{cx,cy,r:21,fill:'#244564',stroke:'#fff','stroke-width':2},root);const t=svgEl('text',{x:cx,y:cy+6,fill:'white','font-size':18,'text-anchor':'middle'},root);t.textContent=i+1});
+}
+$('graph-example').addEventListener('change',setup);$('source').addEventListener('change',draw);$('target').addEventListener('change',draw);
+$('next').addEventListener('click',()=>{stage=Math.min(4,stage+1);draw()});$('prev').addEventListener('click',()=>{stage=Math.max(0,stage-1);draw()});$('all').addEventListener('click',()=>{stage=4;draw()});$('reset').addEventListener('click',setup);setup();
+</script></body></html>
