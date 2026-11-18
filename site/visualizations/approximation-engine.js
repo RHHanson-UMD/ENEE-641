@@ -28,13 +28,14 @@ export function metricTsp(points){
  search([],rest);
  return {mst,preorder,mstCost,approxCost,optimum,bestTour,ratio:approxCost/optimum};
 }
-export function setCover(universe,sets){
+export function setCover(universe,sets,preferredOrder=sets.map((_,i)=>i)){
  if(!Array.isArray(universe)||!Array.isArray(sets)||universe.length>18||sets.length>18||new Set(universe).size!==universe.length)throw Error('Invalid set-cover input');
  const all=new Set(universe);if(sets.some(s=>!Array.isArray(s)||s.some(x=>!all.has(x))))throw Error('Invalid member');
+ if(!Array.isArray(preferredOrder)||preferredOrder.length!==sets.length||new Set(preferredOrder).size!==sets.length||preferredOrder.some(i=>!Number.isInteger(i)||i<0||i>=sets.length))throw Error('Invalid tie-breaking order');
  const covered=new Set(),steps=[],selected=[];
  while(covered.size<all.size){
   let best=-1,gain=0;
-  sets.forEach((s,i)=>{const g=new Set(s.filter(x=>!covered.has(x))).size;if(!selected.includes(i)&&g>gain){best=i;gain=g}});
+  preferredOrder.forEach(i=>{const g=new Set(sets[i].filter(x=>!covered.has(x))).size;if(!selected.includes(i)&&g>gain){best=i;gain=g}});
   if(best<0)throw Error('Universe is not coverable');
   selected.push(best);sets[best].forEach(x=>covered.add(x));
   steps.push({index:best,newlyCovered:gain,covered:[...covered]});
