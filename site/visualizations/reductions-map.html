@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure 34.13 — NP-completeness reduction map | ENEE 641</title>
+<meta name="description" content="Step through CLRS Figure 34.13 polynomial-time reduction dependencies with verified source and practice DAGs.">
+<link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>
+.lesson{max-width:1160px;margin:auto;padding:35px 18px 90px}
+.lesson h1{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.17;margin:18px 0}
+.lesson h2{font-size:1.45rem;margin:10px 0}
+.lesson p,.lesson li{line-height:1.65}
+.panel{margin:18px 0;padding:20px;background:var(--surface,#1a2c40);color:var(--text,#e8f0fc);border:1px solid var(--line,#73829a);border-radius:15px}
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0}
+.controls select,.controls button{background:#263f5a;border:1px solid #a9b4c5;border-radius:9px;padding:10px 12px;color:white}
+.controls button{cursor:pointer}.controls button:disabled{opacity:.45;cursor:default}
+.controls button:focus-visible,.controls select:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}
+.canvas{overflow:auto;background:#101d32;border-radius:11px;padding:10px}
+.canvas svg{width:100%;min-width:670px;display:block}
+.note{padding:12px;border:1px solid #72869e;border-radius:9px;line-height:1.55;margin:10px 0}
+.reference{font-size:.92rem;color:var(--muted,#c8d3e1)}
+.key{display:flex;gap:15px;flex-wrap:wrap}
+.key span{font-size:.9rem}
+@media(max-width:760px){.panel{padding:13px}.canvas svg{min-width:660px}}
+</style></head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="container nav-row">
+<a class="brand" href="../">ENEE 641 / Learning Lab</a>
+<nav class="site-nav"><a href="../">Course home</a><a href="#proof">Reduction meaning</a></nav>
+<div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">&#9790;</button></div>
+</div></header>
+<main id="main" class="lesson">
+<div class="section-label">CHAPTER 34 / NP-COMPLETENESS / REDUCTION STRUCTURE</div>
+<h1>Figure 34.13 — follow the reductions.</h1>
+<p>Source: Cormen, Leiserson, Rivest &amp; Stein, <em>Introduction to Algorithms</em>, 2nd ed., <strong>Figure 34.13</strong>; ENEE 641 <em>Chapter34Nov5-2026.pptx</em>, slide 27. The default graph uses the source reduction structure but has been drawn independently.</p>
+<p>A directed arrow <strong>A → B</strong> means that an instance of problem A can be transformed into an instance of B in polynomial time, preserving the yes/no answer. Follow arrows to see how NP-hardness results are transferred between problems.</p>
+<section class="panel" aria-label="Interactive reduction diagram">
+<h2>Choose a reduction graph</h2>
+<div class="controls">
+<label for="example">Example</label>
+<select id="example">
+<option value="source">Figure 34.13 — actual reduction map</option>
+<option value="chain">Practice — abstract reduction chain</option>
+<option value="fork">Practice — abstract fork and join</option>
+</select>
+<button id="reset-source" type="button">Reset to Figure 34.13</button>
+</div>
+<p class="reference" id="provenance">Textbook example — original rendering</p>
+<div class="controls">
+<label for="from">Start problem</label><select id="from"></select>
+<label for="to">Destination</label><select id="to"></select>
+</div>
+<div class="controls">
+<button type="button" id="previous">Previous</button>
+<button type="button" id="next">Next arrow</button>
+<button type="button" id="show-all">Trace full path</button>
+<button type="button" id="restart">Restart path</button>
+</div>
+<div class="canvas">
+<svg id="graph" viewBox="0 0 1080 390" role="img" aria-label="Directed graph of polynomial-time reductions; highlighted arrows show the selected path"></svg>
+</div>
+<div class="key"><span style="color:#2dd4bf">■ Highlighted path</span><span style="color:#c1cedf">■ Other reductions</span><span style="color:#fbbf24">■ Current arrow</span></div>
+<div class="note" role="status" aria-live="polite" id="state"></div>
+<p id="path-details"></p>
+</section>
+<section class="panel" id="proof">
+<h2>Why the direction of an arrow matters</h2>
+<p>If <strong>A ≤ₚ B</strong>, then a polynomial-time algorithm for B would also solve A in polynomial time: transform an A instance into B, solve it, and reuse the answer. Conversely, if A is already NP-hard, this reduction helps establish NP-hardness of B. Membership of B in NP must also be proved before concluding that B is NP-complete.</p>
+<p>Polynomial-time reductions compose: if A ≤ₚ B and B ≤ₚ C, then A ≤ₚ C. A chain in the graph represents this composition. The highlighted path is one route to a result, not a proof that its individual arrows are valid; those reductions require separate mathematical constructions.</p>
+<p>The two additional graphs are deliberately <em>abstract exercises</em>, not statements that named problems are NP-complete. Try selecting a destination that cannot be reached from the start to see why reversing an arrow is generally invalid.</p>
+<p>Continue with the <a href="./clique-cover.html">CLIQUE / VERTEX-COVER reductions</a> or the <a href="./subset-sum.html">3-CNF-SAT → SUBSET-SUM construction</a>.</p>
+</section>
+</main>
+<script type="module">
+import {scenarios,validateDAG,reductionPath,reductionSteps} from './reductions-map-engine.js';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';
+let graph, path=[],step=0;
+function element(tag,attrs,parent){const node=document.createElementNS(ns,tag);for(const [key,val] of Object.entries(attrs))node.setAttribute(key,val);parent.append(node);return node;}
+function nodeName(id){return graph.nodes.find(n=>n.id===id)?.label??id;}
+function selectOptions(name,selected){
+ const select=$(name);select.replaceChildren();
+ graph.nodes.forEach(n=>{const option=document.createElement('option');option.value=n.id;option.textContent=n.label;select.append(option)});
+ select.value=selected;
+}
+function selectExample(){
+ graph=scenarios[$('example').value];validateDAG(graph);
+ selectOptions('from',graph.initialFrom);selectOptions('to',graph.initialTo);
+ $('provenance').textContent=graph.provenance;
+ selectPath();
+}
+function selectPath(){
+ path=reductionPath(graph,$('from').value,$('to').value);step=0;draw();
+}
+function draw(){
+ const root=$('graph');root.replaceChildren();
+ const defs=element('defs',{},root),marker=element('marker',{id:'arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'},defs);
+ element('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#c0cbdb'},marker);
+ const markerActive=element('marker',{id:'arrow-active',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'},defs);
+ element('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#fbbf24'},markerActive);
+ const steps=reductionSteps(path),highlighted=steps.slice(0,step);
+ const highlightedEdges=new Set(highlighted.map(s=>s.from+':'+s.to));
+ const current=highlighted.at(-1);
+ for(const [from,to] of graph.edges){
+  const a=graph.nodes.find(n=>n.id===from),b=graph.nodes.find(n=>n.id===to);
+  const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);
+  const marginA=Math.max(43,a.label.length*4.8+15),marginB=Math.max(43,b.label.length*4.8+15);
+  const x1=a.x+dx/len*marginA,y1=a.y+dy/len*marginA,x2=b.x-dx/len*marginB,y2=b.y-dy/len*marginB;
+  const isMarked=highlightedEdges.has(from+':'+to),isNow=current?.from===from&&current?.to===to;
+  const line=element('line',{x1,y1,x2,y2,stroke:isNow?'#fbbf24':isMarked?'#2dd4bf':'#8696ab','stroke-width':isNow?6:isMarked?5:2.7,'marker-end':isNow?'url(#arrow-active)':'url(#arrow)'},root);
+  element('title',{},line).textContent=nodeName(from)+' reduces to '+nodeName(to);
+ }
+ const activeNodes=new Set(path.slice(0,step+1));
+ for(const node of graph.nodes){
+  const width=Math.max(82,node.label.length*9.6+23),active=activeNodes.has(node.id);
+  const rect=element('rect',{x:node.x-width/2,y:node.y-26,width,height:52,rx:12,fill:active?'#0f766e':'#243e5e',stroke:active?'#a7f3d0':'#d7e0f0','stroke-width':active?3:2},root);
+  element('title',{},rect).textContent=node.label;
+  const text=element('text',{x:node.x,y:node.y+6,'font-size':18,'text-anchor':'middle',fill:'#fff','font-weight':600},root);text.textContent=node.label;
+ }
+ $('previous').disabled=step===0;
+ $('next').disabled=path.length<2||step===steps.length;
+ $('show-all').disabled=path.length<2||step===steps.length;
+ if(!path.length){
+  $('state').textContent='No directed reduction path from '+nodeName($('from').value)+' to '+nodeName($('to').value)+'. Arrows cannot be reversed without a separate reduction proof.';
+  $('path-details').textContent='Try changing the start or destination.';
+ }else{
+  $('state').textContent=step===0?'Initial: choose Next arrow to trace a polynomial-time reduction path.':('Step '+step+'/'+steps.length+': '+nodeName(steps[step-1].from)+' ≤ₚ '+nodeName(steps[step-1].to)+'.');
+  $('path-details').textContent='Path: '+path.map(nodeName).join(' → ')+'. '+(step===steps.length?'All arrows along this route highlighted. Polynomial-time reducibility composes.': 'Highlighted arrows: '+step+' of '+steps.length+'.');
+ }
+}
+$('example').addEventListener('change',selectExample);
+$('from').addEventListener('change',selectPath);
+$('to').addEventListener('change',selectPath);
+$('previous').addEventListener('click',()=>{step=Math.max(0,step-1);draw()});
+$('next').addEventListener('click',()=>{step=Math.min(reductionSteps(path).length,step+1);draw()});
+$('show-all').addEventListener('click',()=>{step=reductionSteps(path).length;draw()});
+$('restart').addEventListener('click',()=>{step=0;draw()});
+$('reset-source').addEventListener('click',()=>{$('example').value='source';selectExample()});
+selectExample();
+</script>
+</body></html>
