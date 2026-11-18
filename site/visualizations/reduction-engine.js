@@ -1,9 +1,44 @@
 // Original 3-CNF example for teaching Chapter 34 reductions; not a copied textbook diagram.
-export const clauses=[
- [{variable:0,positive:true},{variable:1,positive:false},{variable:2,positive:true}],
- [{variable:0,positive:false},{variable:1,positive:true},{variable:2,positive:true}],
- [{variable:0,positive:false},{variable:1,positive:false},{variable:2,positive:false}]
-];
+const l=(variable,positive)=>({variable,positive});
+/** CLRS 2nd ed. Fig. 34.14 / Chapter34Nov5-2026.pptx slide 29.
+ * Source clause values only; graph geometry is independently rendered. */
+export const formulaExamples={
+  source:{
+    id:'clrs-34-14',
+    label:'Figure 34.14 — exact source clauses',
+    provenance:'CLRS 2nd ed., Figure 34.14; ENEE 641 slide 29 — original rendering',
+    assignment:[0,0,1],
+    preferredLiteralIndices:[1,2,2],
+    clauses:[
+      [l(0,true),l(1,false),l(2,false)],
+      [l(0,false),l(1,true),l(2,true)],
+      [l(0,true),l(1,true),l(2,true)]
+    ]
+  },
+  practice:{
+    id:'practice-3cnf',
+    label:'Practice — alternative satisfiable 3-CNF',
+    provenance:'Independently authored 3-CNF formula; not Figure 34.14',
+    assignment:[0,0,0],
+    clauses:[
+      [l(0,true),l(1,false),l(2,true)],
+      [l(0,false),l(1,true),l(2,true)],
+      [l(0,false),l(1,false),l(2,false)]
+    ]
+  },
+  impossible:{
+    id:'practice-unsatisfiable',
+    label:'Practice — contradictory clauses (UNSAT)',
+    provenance:'Independently authored repeated-literal counterexample; not Figure 34.14',
+    assignment:[0,1,0],
+    clauses:[
+      [l(0,true),l(0,true),l(0,true)],
+      [l(0,false),l(0,false),l(0,false)],
+      [l(1,true),l(1,true),l(1,true)]
+    ]
+  }
+};
+export const clauses=formulaExamples.source.clauses;
 export function literalTrue(lit,assignment){return Boolean(assignment[lit.variable])===lit.positive;}
 export function formulaSatisfied(formula,assignment){return formula.every(clause=>clause.some(l=>literalTrue(l,assignment)));}
 export function reductionGraph(formula){
@@ -46,9 +81,13 @@ export function isVertexCover(graph,cover){
  const s=new Set(cover);
  return graph.edges.every(([u,v])=>s.has(u)||s.has(v));
 }
-export function selectedCompatible(graph,assignment){
+export function selectedCompatible(graph,assignment,preferredLiteralIndices=[]){
  const candidates=graph.vertices.map((v,i)=>literalTrue(v,assignment)?i:-1);
- const byClause=Array.from({length:graph.k},(_,clause)=>candidates.find(i=>i>=0&&graph.vertices[i].clause===clause));
+ const byClause=Array.from({length:graph.k},(_,clause)=>{
+  const preferred=preferredLiteralIndices[clause],id=clause+':'+preferred;
+  const chosen=candidates.find(i=>i>=0&&graph.vertices[i].id===id);
+  return chosen!==undefined?chosen:candidates.find(i=>i>=0&&graph.vertices[i].clause===clause);
+ });
  return byClause.every(i=>i!==undefined)?byClause:[];
 }
 export function enumerateAssignments(n){
