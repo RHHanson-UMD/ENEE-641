@@ -28,3 +28,12 @@ publishes `site/` on pushes to `main`.
 - Keep algorithm math tested independently of the presentation layer.
 
 The course roadmap is illustrative, not an instructor syllabus.
+
+## Chapter 35 approximation explorers
+
+The Chapter 35 source-based demonstrations on this feature branch are:
+
+- `site/visualizations/vertex-cover.html`: 2-approximate vertex cover and maximal matching, with exact small-graph comparison.
+- `site/visualizations/approximation-lab.html`: metric traveling salesperson via MST preorder, greedy set covering and a trimmed SUBSET-SUM approximation scheme.
+
+The examples and graphics are independently authored. Their lecture source is the connected ENEE 641 `Chapter35Nov17-2026.pptx` deck; copyrighted slides are not reproduced. Run `npm test` and preview with `python -m http.server 8000 -d site`. These modules are not live until their PR is reviewed and deployed.
