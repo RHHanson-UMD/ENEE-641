@@ -1,0 +1,46 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relaxation, Bellman–Ford & Dijkstra | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1100px;margin:auto;padding:38px 18px 90px}h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.15;margin:18px 0}p{line-height:1.6}.panel{background:var(--surface,#1e293b);border:1px solid var(--line,#64748b);color:var(--text,#f1f5f9);border-radius:15px;padding:18px;margin:15px 0}.cols{display:grid;grid-template-columns:1fr 1fr;gap:17px}.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button,select{padding:10px;border:1px solid #94a3b8;background:#243c59;color:white;border-radius:9px;cursor:pointer}button:disabled{opacity:.45}button:focus-visible,select:focus-visible{outline:3px solid #fde68a;outline-offset:3px}
+svg{width:100%;background:#0e1c30;border-radius:10px}table{width:100%;border-collapse:collapse}th,td{padding:10px;border:1px solid #728297;text-align:center}output{display:block;border:1px solid #728297;border-radius:9px;padding:12px;margin:12px 0;line-height:1.5}
+@media(max-width:800px){.cols{grid-template-columns:1fr}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course</a><a href="#proof">Proof</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main id="main" class="lab"><div class="section-label">CHAPTER 24 / SINGLE-SOURCE SHORTEST PATHS</div><h1>How distance estimates converge.</h1><p>Examine how relaxation changes distance estimates from source vertex 1. Bellman–Ford allows negative edges and detects reachable negative cycles; Dijkstra requires nonnegative edge weights and finalizes the currently closest tentative vertex.</p>
+<section class="panel"><div class="controls"><label for="scenario">Graph</label><select id="scenario"><option value="nonnegative">Nonnegative edges</option><option value="negative">One negative edge</option><option value="negativeCycle">Reachable negative cycle</option></select><label for="algorithm">Algorithm</label><select id="algorithm"><option value="bellman">Bellman–Ford</option><option value="dijkstra">Dijkstra</option></select></div><div class="controls"><button id="prev" type="button">Previous</button><button id="next" type="button">Next</button><button id="last" type="button">Final</button><button id="reset" type="button">Reset</button><label for="dest">Inspect path to</label><select id="dest"></select></div><output id="stage" aria-live="polite"></output></section>
+<div class="cols"><section class="panel"><h2>Directed graph</h2><svg id="graph" viewBox="0 0 500 365" role="img" aria-label="Directed weighted graph with shortest path and recently relaxed arcs"></svg><p>Teal: currently traced predecessor path; amber: edges relaxed in this step; grey: remaining edges.</p></section><section class="panel"><h2>Distance and predecessor table</h2><table id="dist-table"><caption>Current estimates from source 1</caption></table><output id="path" aria-live="polite"></output><h2>Recent relaxations</h2><ol id="updates"></ol></section></div>
+<section class="panel" id="proof"><h2>What the algorithms guarantee</h2><p><strong>Relaxation:</strong> if d[u] + w(u,v) &lt; d[v], update d[v] and set predecessor[v] = u. A finite estimate describes the cost of an actual discovered path; it remains an upper bound on the true shortest-path distance when no reachable negative cycle exists.</p><p><strong>Bellman–Ford:</strong> after i full rounds, all vertices with a shortest simple path containing at most i edges have their correct shortest distances. With no reachable negative cycle, a shortest path needs at most |V|−1 edges. A further improving edge detects a reachable negative cycle. Running time O(|V||E|).</p><p><strong>Dijkstra:</strong> if every edge has nonnegative weight, choosing the minimum tentative distance among unsettled vertices finalizes a correct distance. This implementation scans linearly to find that vertex, giving O(V²+E); a suitable priority queue improves the asymptotic bound.</p><p><strong>Source:</strong> ENEE 641 <em>Chapter24Oct29-2026.pptx</em>, relaxation, Bellman–Ford, and Dijkstra's algorithm, correctness and complexity. Original illustrative graphs and code; no copyrighted slide artwork reused.</p></section></main>
+<script type="module">
+import {samples,bellmanFord,dijkstra,tracePath} from './shortest-paths-engine.js';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';
+const positions=[[65,180],[185,55],[250,290],[395,110],[450,300]];
+let sample,result,step=0,error='';
+function mk(tag,attrs,parent){const e=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));parent.append(e);return e}
+const fmt=x=>Number.isFinite(x)?x:'∞';
+function setup(){
+ sample=samples[$('scenario').value];step=0;error='';
+ try{result=$('algorithm').value==='dijkstra'?dijkstra(sample.n,sample.edges,0):bellmanFord(sample.n,sample.edges,0)}
+ catch(e){error=e.message;result=null;}
+ $('dest').replaceChildren();for(let i=0;i<sample.n;i++){const op=document.createElement('option');op.value=i;op.textContent=i+1;$('dest').append(op)}$('dest').value=String(sample.n-1);draw();
+}
+function draw(){
+ const state=result?.steps[step];$('prev').disabled=!state||step===0;$('next').disabled=!state||step===result.steps.length-1;$('last').disabled=!state||step===result.steps.length-1;
+ $('stage').textContent=error?'Algorithm unavailable: '+error:state.phase==='initialize'?'Initial estimates: source distance = 0, all others = ∞.':state.phase==='check'?'Final negative-cycle check: '+(result.negativeCycleReachable?'an additional relaxation is possible; a reachable negative cycle exists.':'no further improvement; shortest distances are final.'):'Step '+step+': '+(state.phase==='finalize'?'finalize vertex '+(state.vertex+1):'complete relaxation round '+state.round)+'. '+state.updated.length+' distance estimate(s) improved.';
+ const table=$('dist-table');table.replaceChildren();const head=document.createElement('tr');for(const h of ['Vertex','d[v]','Predecessor']){const th=document.createElement('th');th.textContent=h;head.append(th)}table.append(head);
+ if(state)state.d.forEach((x,i)=>{const row=document.createElement('tr');for(const val of [i+1,fmt(x),state.parent[i]===null?'—':state.parent[i]+1]){const td=document.createElement('td');td.textContent=val;row.append(td)}table.append(row)});
+ const dest=Number($('dest').value);let path=state?tracePath(state.parent,0,dest):[];
+ if(result?.negativeCycleReachable&&state?.phase==='check')path=[];
+ $('path').textContent=!state?'Select Bellman–Ford for this graph.':result?.negativeCycleReachable&&state.phase==='check'?'A reachable negative cycle prevents a finite shortest-walk distance for some vertices; predecessor paths are not reliable.':path.length?'Current discovered path: '+path.map(x=>x+1).join(' → ')+'. Cost '+fmt(state.d[dest])+'.':'No currently reconstructed path to vertex '+(dest+1)+'.';
+ $('updates').replaceChildren();if(state){if(!state.updated.length){const li=document.createElement('li');li.textContent='No relaxations in this step.';$('updates').append(li)}
+ state.updated.forEach(x=>{const li=document.createElement('li');li.textContent=(x.u+1)+' → '+(x.v+1)+' ('+x.w+'): '+fmt(x.old)+' → '+fmt(x.value);$('updates').append(li)})}
+ const graph=$('graph');graph.replaceChildren();const recent=new Set((state?.updated||[]).map(x=>x.u+':'+x.v)),pathEdges=new Set(path.slice(0,-1).map((x,i)=>x+':'+path[i+1]));
+ for(const [u,v,w] of sample.edges){const [x1,y1]=positions[u],[x2,y2]=positions[v],dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy),sx=x1+dx/len*24,sy=y1+dy/len*24,ex=x2-dx/len*24,ey=y2-dy/len*24,key=u+':'+v,col=recent.has(key)?'#fbbf24':pathEdges.has(key)?'#2dd4bf':'#74869d';
+ mk('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:col,'stroke-width':recent.has(key)?5:3},graph);
+ const nx=-dy/len,ny=dx/len;
+ mk('polyline',{points:(ex-dx/len*13+nx*7)+','+(ey-dy/len*13+ny*7)+' '+ex+','+ey+' '+(ex-dx/len*13-nx*7)+','+(ey-dy/len*13-ny*7),stroke:col,fill:'none','stroke-width':2},graph);
+ const lab=mk('text',{x:(x1+x2)/2+nx*14,y:(y1+y2)/2+ny*14,fill:'white','font-size':18,'text-anchor':'middle'},graph);lab.textContent=w;}
+ for(let i=0;i<sample.n;i++){const [cx,cy]=positions[i];mk('circle',{cx,cy,r:21,fill:'#234a67',stroke:'#eee','stroke-width':2},graph);const t=mk('text',{x:cx,y:cy+6,fill:'white','font-size':18,'text-anchor':'middle'},graph);t.textContent=i+1;}
+}
+$('scenario').addEventListener('change',setup);$('algorithm').addEventListener('change',setup);$('dest').addEventListener('change',draw);
+$('next').addEventListener('click',()=>{step=Math.min(step+1,result.steps.length-1);draw()});
+$('prev').addEventListener('click',()=>{step=Math.max(step-1,0);draw()});
+$('last').addEventListener('click',()=>{step=result.steps.length-1;draw()});$('reset').addEventListener('click',setup);setup();
+</script></body></html>
