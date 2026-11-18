@@ -36,3 +36,18 @@ Use dark mode by default and a persistently selectable light option. Maintain ke
 Work in focused issue-linked PRs. Inspect differences for prohibited publication material; run `npm test` for code/math changes plus link, keyboard/theme and desktop layout checks when possible. Verify the PR's CI separately from the post-merge Pages workflow and independently open the published course URL; do not claim deployment based on merge or green tests.
 
 At each batch report exact sources actually opened (without confidential access links), files modified, tests actually executed, PR/commit, live Pages result or unverified status, source/copyright risks, and next source section or issue checkpoint. Close #22 only after this file is reviewed and acceptance verified.
+
+
+## Mandatory publication and workflow security rules
+
+These constraints apply to both human contributors and automated coding agents.
+Before creating a public commit, PR, Issue, comment, artifact, or Pages deployment:
+
+1. **No secrets:** Never paste or commit access tokens, GitHub PATs, API keys, passwords, SSH/private keys, session cookies, sensitive configuration, or credentials. Read secrets only from a dedicated secret store, and use a least-privilege short-lived credential if needed. If exposure occurs, stop publication, revoke/rotate privately, and never copy the value into a public remediation issue.
+2. **No restricted academic data:** Never publish private Drive/ELMS URLs, instructor PDFs, office/lecture material, student records, answer keys, unreleased homework or copyrighted figures without documented redistribution rights. Solution release alone is insufficient. Prefer original independent examples and neutral source references.
+3. **No dangerous workflows:** Keep third-party GitHub Actions pinned to verified full commit SHAs; set minimal explicit workflow permissions; do not introduce \`pull_request_target\`, \`workflow_run\`, or workflow-wide write tokens without separate security review. Deploy only from reviewed \`main\` changes.
+4. **Do not bypass checks:** The publication safety gate and Gitleaks secret scan must pass before merge. Never disable, skip, weaken or add an exclusion to either tool merely to clear a failing check. A false positive requires documented maintainer review and a tested narrow fix.
+5. **Pre-merge review:** Inspect the full diff for accidental publication and workflow privilege changes. Require independent approval for security-control changes when GitHub branch protections support it. Verify Pages after deploy; do not treat passing CI as proof of publication safety or licensing.
+6. **New repositories:** Copy this policy, the pinned-workflow baseline, secret scanning and publication guard into every new course repo before enabling Pages.
+
+The automated \`scripts/check_publication.py\` gate blocks common accidental disclosure paths, selected restricted file formats, private course-storage URLs, and unsafe workflow references. It cannot determine copyright ownership or detect every secret; maintain human rights/security review as a separate requirement.
