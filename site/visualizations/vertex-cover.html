@@ -19,16 +19,18 @@ output{display:block;min-height:45px;margin-top:15px} .stats{display:grid;grid-t
 </style></head>
 <body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course home</a><a href="#proof">Proof</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
 <main id="main" class="explorer"><div class="section-label">CHAPTER 35 / APPROXIMATION ALGORITHMS</div>
-<h1>Vertex cover: why <em>two</em> is enough.</h1><p>This is an original illustrative graph, not a reproduction of the lecture slide. Follow the algorithm that picks an uncovered edge, adds both endpoints, and deletes every edge incident to those vertices.</p>
-<div class="layout"><section class="panel" aria-label="Interactive graph"><h2>Graph and matching</h2><div class="controls"><label for="example">Example graph</label><select id="example"><option value="path">Path (5 vertices)</option><option value="triangle">Triangle</option><option value="star">Star</option><option value="cycle">Cycle (6 vertices)</option></select></div>
+<h1>Figure 35.1 — Vertex cover: why <em>two</em> is enough.</h1><p>Source: CLRS, <em>Introduction to Algorithms</em>, 2nd ed., Figure 35.1; ENEE 641 <em>Chapter35Nov17-2026.pptx</em>, slide 3. The default graph reconstructs the source vertices and edges in an original layout. Follow the approximation algorithm by choosing an uncovered edge, adding both endpoints and deleting every incident edge.</p>
+<div class="layout"><section class="panel" aria-label="Interactive graph"><h2>Graph and matching</h2><div class="controls"><label for="example">Example graph</label><select id="example"><option value="source">Figure 35.1 — source graph (7 vertices)</option><option value="path">Practice — path (5 vertices)</option><option value="triangle">Practice — triangle</option><option value="star">Practice — star</option><option value="cycle">Practice — cycle (6 vertices)</option></select></div><p id="source-label">Textbook Figure 35.1 data — independently drawn graph.</p>
 <svg id="graph" viewBox="0 0 540 370" role="img" aria-label="Graph showing selected cover vertices and picked matching edges"></svg>
 <div class="legend"><span><span class="mark"></span> Algorithm cover</span><span> <strong style="color:#fbbf24">━</strong> Picked matching edge</span><span><strong style="color:#fb923c">◯</strong> Optimal cover (outline on completion)</span></div></section>
-<section class="panel"><h2>Walk through the algorithm</h2><p id="step-caption" aria-live="polite">Start: all edges uncovered.</p><div class="controls"><button id="next" type="button">Pick next edge</button><button id="reset" type="button">Reset</button><button id="all" type="button">Run all</button></div><div class="stats"><div class="stat">Approximation<b id="approx-size">0</b></div><div class="stat">Optimal<b id="opt-size">—</b></div><div class="stat">Ratio<b id="ratio">—</b></div></div>
+<section class="panel"><h2>Walk through the algorithm</h2><p id="step-caption" aria-live="polite">Start: all edges uncovered.</p><div class="controls"><button id="next" type="button">Pick next edge</button><button id="reset" type="button">Restart this graph</button><button id="reset-source" type="button">Reset to Figure 35.1</button><button id="all" type="button">Run all</button></div><div class="stats"><div class="stat">Approximation<b id="approx-size">0</b></div><div class="stat">Optimal<b id="opt-size">—</b></div><div class="stat">Ratio<b id="ratio">—</b></div></div>
 <output id="verdict" aria-live="polite"></output><h2>Try changing the tie-break</h2><p>The algorithm permits any uncovered edge. Select a different first edge to explore how its output changes.</p><label for="first-edge">First edge</label><select id="first-edge"></select></section></div>
 <section id="proof" class="panel" style="margin-top:25px"><h2>Why this guarantees a 2-approximation</h2><p>The chosen edges form a <strong>maximal matching</strong>: no two selected edges share a vertex, and every original edge touches an endpoint selected by the algorithm. A valid vertex cover needs at least one endpoint of <em>every matching edge</em>. Thus OPT ≥ |M|, while the algorithm selects exactly 2|M| vertices. Therefore |C| = 2|M| ≤ 2 OPT.</p><p>A maximal matching need not be a maximum matching, and a 2-approximation guarantee does not mean the returned cover always costs twice the optimum. The exact optimum displayed here is computed by exhaustive search for these small teaching graphs; it is <em>not</em> part of the polynomial-time approximation algorithm.</p><p><strong>Source:</strong> ENEE 641 lecture, <em>Chapter35Nov17-2026.pptx</em>, APPROX-VERTEX-COVER and Theorem 35.1; Cormen, Leiserson, Rivest and Stein, <em>Introduction to Algorithms</em>, 2nd ed., Chapter 35. Independently authored implementation.</p></section></main>
 <script type="module">
 import {approxVertexCover,optimumCover,isCover} from './vertex-cover-engine.js';
+import {vertexCoverFigure351 as source} from './ch35-figure-seeds.js';
 const shapes={
+source:{n:source.n,edges:source.edges,pos:source.positions,labels:source.labels},
 path:{n:5,edges:[[0,1],[1,2],[2,3],[3,4]],pos:[[80,185],[180,90],[280,185],[380,90],[475,185]]},
 triangle:{n:3,edges:[[0,1],[1,2],[0,2]],pos:[[270,55],[110,305],[430,305]]},
 star:{n:5,edges:[[0,1],[0,2],[0,3],[0,4]],pos:[[270,180],[80,55],[460,55],[80,320],[460,320]]},
@@ -36,8 +38,8 @@ cycle:{n:6,edges:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]],pos:[[270,35],[420,105],[
 let g, run, index;
 const $=id=>document.getElementById(id);
 function setup(){
-g=shapes[$('example').value];$('first-edge').replaceChildren();
-g.edges.forEach(([u,v],i)=>{const op=document.createElement('option');op.value=i;op.textContent=(u+1)+'–'+(v+1);$('first-edge').append(op)});
+g=shapes[$('example').value];$('source-label').textContent=$('example').value==='source'?'Textbook Figure 35.1 mathematical data; original graph rendering.':'Independent practice graph — not the textbook figure.';$('first-edge').replaceChildren();
+g.edges.forEach(([u,v],i)=>{const op=document.createElement('option');op.value=i;op.textContent=(g.labels?.[u]??String(u+1))+'–'+(g.labels?.[v]??String(v+1));$('first-edge').append(op)});
 restart();
 }
 function restart(){
@@ -51,15 +53,15 @@ const optimal=optimumCover(g.n,g.edges); const done=index===run.steps.length;
 const svg=$('graph');svg.replaceChildren();
 const ns='http://www.w3.org/2000/svg';
 const el=(tag,attr,parent=svg)=>{const x=document.createElementNS(ns,tag);Object.entries(attr).forEach(([k,v])=>x.setAttribute(k,v));parent.append(x);return x};
-g.edges.forEach(([u,v],i)=>{const [x1,y1]=g.pos[u],[x2,y2]=g.pos[v];const line=el('line',{x1,y1,x2,y2,class:'edge'+(picked.has(i)?' active':!remaining.has(i)?' removed':'')});const title=el('title',{},line);title.textContent='Edge '+(u+1)+' to '+(v+1)});
-g.pos.forEach(([cx,cy],i)=>{const node=el('circle',{cx,cy,r:25,class:'node'+(state.cover.includes(i)?' cover':'')+(done&&optimal.includes(i)?' opt':'')});el('title',{},node).textContent='Vertex '+(i+1);const t=el('text',{x:cx,y:cy,class:'node-label'});t.textContent=i+1});
+g.edges.forEach(([u,v],i)=>{const [x1,y1]=g.pos[u],[x2,y2]=g.pos[v];const line=el('line',{x1,y1,x2,y2,class:'edge'+(picked.has(i)?' active':!remaining.has(i)?' removed':'')});const title=el('title',{},line);title.textContent='Edge '+(g.labels?.[u]??String(u+1))+' to '+(g.labels?.[v]??String(v+1))});
+g.pos.forEach(([cx,cy],i)=>{const node=el('circle',{cx,cy,r:25,class:'node'+(state.cover.includes(i)?' cover':'')+(done&&optimal.includes(i)?' opt':'')});el('title',{},node).textContent='Vertex '+(g.labels?.[i]??String(i+1));const t=el('text',{x:cx,y:cy,class:'node-label'});t.textContent=g.labels?.[i]??String(i+1)});
 $('approx-size').textContent=state.cover.length;$('opt-size').textContent=optimal.length;
 $('ratio').textContent=done?(optimal.length? (state.cover.length/optimal.length).toFixed(2):'1.00'):'—';
 $('next').disabled=done;$('all').disabled=done;
-$('step-caption').textContent= !index?'Start: all edges uncovered.': 'Step '+index+': picked edge '+g.edges[run.steps[index-1].picked].map(v=>v+1).join('–')+', added its endpoints and discarded '+run.steps[index-1].discarded.length+' incident edge(s).';
+$('step-caption').textContent= !index?'Start: all edges uncovered.': 'Step '+index+': picked edge '+g.edges[run.steps[index-1].picked].map(v=>g.labels?.[v]??String(v+1)).join('–')+', added its endpoints and discarded '+run.steps[index-1].discarded.length+' incident edge(s).';
 $('verdict').textContent=done?'Finished: cover valid = '+isCover(g.n,g.edges,state.cover)+'. '+state.cover.length+' ≤ 2 × '+optimal.length+'. The matching has '+run.matching.length+' edge(s).':'Remaining uncovered edges: '+state.remaining.length+'. Advance to see the next choice.';
 }
 $('next').addEventListener('click',()=>{if(index<run.steps.length){index++;draw()}});
 $('all').addEventListener('click',()=>{index=run.steps.length;draw()});
-$('reset').addEventListener('click',restart);$('first-edge').addEventListener('change',restart);$('example').addEventListener('change',setup);setup();
+$('reset').addEventListener('click',restart);$('reset-source').addEventListener('click',()=>{$('example').value='source';setup()});$('first-edge').addEventListener('change',restart);$('example').addEventListener('change',setup);setup();
 </script></body></html>
