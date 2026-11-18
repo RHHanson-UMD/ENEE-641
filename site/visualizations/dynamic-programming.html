@@ -1,0 +1,47 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dynamic Programming Lab | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1150px;margin:auto;padding:38px 18px 100px}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:18px 0}p{line-height:1.65}.panel{background:var(--surface,#1b2d41);color:var(--text,#f1f5f9);border:1px solid var(--line,#64748b);border-radius:15px;padding:20px;margin:18px 0}.cols{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr);gap:18px}.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}button,select,input{background:#253d5a;color:#fff;border:1px solid #94a3b8;border-radius:9px;padding:10px}input{max-width:170px}button{cursor:pointer}button:disabled{opacity:.45}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #fde68a;outline-offset:3px}
+table{border-collapse:collapse;text-align:center;font-variant-numeric:tabular-nums;min-width:100%}th,td{border:1px solid #64748b;padding:9px 7px;min-width:29px}.table-scroll{overflow:auto}.fresh{background:#116c5b;color:white}output{display:block;border:1px solid #64748b;border-radius:9px;padding:12px;line-height:1.55;margin:10px 0}#chain-updates{max-height:210px;overflow:auto}
+@media(max-width:780px){.cols{grid-template-columns:1fr}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course</a><a href="#proof">Recurrences</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main id="main" class="lab"><div class="section-label">CHAPTER 15 / DYNAMIC PROGRAMMING</div><h1>Make subproblems visible.</h1><p>Two lecture examples: choose the cheapest parenthesization of a matrix product, and find the longest common subsequence (LCS) of two strings. Advance the table one layer at a time to understand how previous subproblems determine later answers.</p>
+<section class="panel"><h2>Matrix-chain multiplication</h2><p>The order of the matrices is fixed; only the parentheses change. Matrix dimensions p₀,p₁,…,pₙ determine the scalar multiplication cost.</p>
+<div class="controls"><label for="chain-example">Dimensions</label><select id="chain-example"><option value="lecture">Lecture: 30,35,15,5,10,20,25</option><option value="small">Small: 10,30,5,60</option></select><button id="chain-prev" type="button">Previous</button><button id="chain-next" type="button">Next chain length</button><button id="chain-all" type="button">Final</button><button id="chain-reset" type="button">Reset</button></div>
+<div class="cols"><div><div class="table-scroll"><table id="chain-table"><caption>Minimum costs m[i,j]; blank cells are not yet computed</caption></table></div></div>
+<div><output id="chain-result" aria-live="polite"></output><ol id="chain-updates"></ol></div></div>
+<p>The lecture's intermediate worked cell m[2,5] (1-based indices) compares three splits and has minimum 7,125 scalar multiplications. Select the six-matrix example and advance to chain length 4 to inspect this cell.</p></section>
+<section class="panel"><h2>Longest common subsequence</h2><p>When the trailing characters match, extend a smaller LCS; otherwise take the better of the two ways to drop one trailing character.</p>
+<div class="controls"><label for="x">X</label><input id="x" maxlength="30" value="ABCBDAB"><label for="y">Y</label><input id="y" maxlength="30" value="BDCABA"><button id="lcs-apply" type="button">Apply strings</button></div>
+<div class="controls"><button id="lcs-prev" type="button">Previous row</button><button id="lcs-next" type="button">Next row</button><button id="lcs-all" type="button">Final</button><button id="lcs-reset" type="button">Reset</button></div>
+<div class="cols"><div class="table-scroll"><table id="lcs-table"><caption>LCS length c[i,j] for sequence prefixes</caption></table></div><div><output id="lcs-result" aria-live="polite"></output><p id="lcs-invariant"></p></div></div></section>
+<section class="panel" id="proof"><h2>Optimal substructure and complexity</h2><p><strong>Matrix chain:</strong> m[i,i] = 0. For i &lt; j, m[i,j] is the minimum over i ≤ k &lt; j of m[i,k] + m[k+1,j] + p[i−1]p[k]p[j] using one-based notation. Optimal subchains are necessary: replacing a subchain with a cheaper parenthesization would improve the parent solution. The three nested choices give O(n³) time and O(n²) cost/split storage.</p>
+<p><strong>LCS:</strong> c[i,0] = c[0,j] = 0. If xᵢ = yⱼ, then c[i,j] = c[i−1,j−1] + 1; otherwise c[i,j] = max(c[i−1,j],c[i,j−1]). The table takes O(mn) time and space. This lesson reconstructs an actual common subsequence, not just its length.</p>
+<p><strong>Source:</strong> ENEE 641 <em>Chapter15Oct6-2026.pptx</em>, matrix-chain multiplication including its six-matrix numeric example, and LCS including X = ABCBDAB and Y = BDCABA. Tables are generated by independent code rather than copied slide art.</p></section></main>
+<script type="module">
+import {matrixChain,lcs,isSubsequence} from './dynamic-programming-engine.js';
+const $=id=>document.getElementById(id);
+const formats={lecture:[30,35,15,5,10,20,25],small:[10,30,5,60]};
+let chain,ci=0,alignment,li=0;
+function tableBuild(table,columns,rows,value,highlight){
+ table.replaceChildren();const tr=document.createElement('tr');for(const label of ['',...columns]){const th=document.createElement('th');th.textContent=label;tr.append(th)}table.append(tr);
+ rows.forEach((row,i)=>{const r=document.createElement('tr'),th=document.createElement('th');th.textContent=row;r.append(th);
+ columns.forEach((col,j)=>{const td=document.createElement('td');const val=value(i,j);td.textContent=val===null?'':String(val);if(highlight(i,j))td.className='fresh';r.append(td)});table.append(r)});
+}
+function chainSetup(){chain=matrixChain(formats[$('chain-example').value]);ci=0;chainDraw()}
+function chainDraw(){const s=chain.stages[ci],n=s.cost.length;
+ tableBuild($('chain-table'),Array.from({length:n},(_,i)=>'j='+(i+1)),Array.from({length:n},(_,i)=>'i='+(i+1)),
+ (i,j)=>i>j?'':s.cost[i][j],(i,j)=>s.updates.some(x=>x.i===i&&x.j===j));
+ $('chain-result').textContent='Subchain length '+s.length+'. '+(ci===chain.stages.length-1?'Optimal scalar multiplications: '+chain.cost+'. Parenthesization: '+chain.parenthesization+'.':'New cells computed: '+s.updates.length+'.');
+ $('chain-updates').replaceChildren();s.updates.forEach(x=>{const e=document.createElement('li');e.textContent='m['+(x.i+1)+','+(x.j+1)+'] = '+x.best+' (split after A'+(x.k+1)+'); candidates: '+x.candidates.map(c=>c.value).join(', ');$('chain-updates').append(e)});
+ $('chain-prev').disabled=ci===0;$('chain-next').disabled=ci===chain.stages.length-1;$('chain-all').disabled=ci===chain.stages.length-1;
+}
+$('chain-example').addEventListener('change',chainSetup);$('chain-prev').addEventListener('click',()=>{ci--;chainDraw()});$('chain-next').addEventListener('click',()=>{ci++;chainDraw()});$('chain-all').addEventListener('click',()=>{ci=chain.stages.length-1;chainDraw()});$('chain-reset').addEventListener('click',chainSetup);
+function lcsSetup(){alignment=lcs($('x').value,$('y').value);li=0;lcsDraw()}
+function lcsDraw(){const s=alignment.stages[li],x=Array.from($('x').value),y=Array.from($('y').value);
+ tableBuild($('lcs-table'),['∅',...y],['∅',...x],(i,j)=>i<=li?s.table[i][j]:'',(i,j)=>i===li&&i>0);
+ $('lcs-result').textContent='Completed '+li+' of '+x.length+' rows. '+(li===x.length?'LCS length: '+alignment.length+'. One LCS: '+(alignment.sequence||'(empty)')+'.':'Continue filling subproblems to reconstruct the LCS.');
+ $('lcs-invariant').textContent=li===x.length?'Reconstructed subsequence belongs to both inputs: '+(isSubsequence(alignment.sequence,$('x').value)&&isSubsequence(alignment.sequence,$('y').value)):'Every completed cell gives the LCS length of the corresponding two prefixes.';
+ $('lcs-prev').disabled=li===0;$('lcs-next').disabled=li===x.length;$('lcs-all').disabled=li===x.length;
+}
+$('lcs-apply').addEventListener('click',lcsSetup);$('lcs-prev').addEventListener('click',()=>{li--;lcsDraw()});$('lcs-next').addEventListener('click',()=>{li++;lcsDraw()});$('lcs-all').addEventListener('click',()=>{li=alignment.stages.length-1;lcsDraw()});$('lcs-reset').addEventListener('click',()=>{$('x').value='ABCBDAB';$('y').value='BDCABA';lcsSetup()});
+chainSetup();lcsSetup();
+</script></body></html>
