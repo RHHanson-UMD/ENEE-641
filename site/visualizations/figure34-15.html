@@ -1,0 +1,109 @@
+<!doctype html><html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Figure 34.15 — CLIQUE to VERTEX-COVER | ENEE 641</title>
+<link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>
+.lab{max-width:1120px;margin:auto;padding:36px 18px 90px}h1{font-size:clamp(2rem,4.7vw,3.4rem);line-height:1.14;margin:20px 0}p{line-height:1.65}
+.panel{background:var(--surface,#192b40);color:var(--text,#e5edf8);border:1px solid var(--line,#718299);border-radius:15px;padding:18px;margin:16px 0}
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:14px}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:11px;margin:10px 0}
+button,select{background:#243e5b;border:1px solid #b1c0d4;color:#fff;border-radius:9px;padding:10px;cursor:pointer}button:disabled{opacity:.45;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #fcd34d;outline-offset:3px}
+svg{width:100%;background:#101e34;border-radius:11px}output{display:block;border:1px solid #70839a;border-radius:9px;padding:14px;margin:10px 0;line-height:1.6}
+.checkboxes{display:flex;flex-wrap:wrap;gap:11px;margin:14px 0}.checkboxes label{display:inline-flex;gap:7px;align-items:center;border:1px solid #72849b;border-radius:8px;padding:7px 12px;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.9rem}
+@media(max-width:760px){.dual{grid-template-columns:1fr}}
+</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course home</a><a href="#proof">Proof</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">&#9790;</button></div></div></header>
+<main class="lab" id="main"><div class="section-label">CHAPTER 34 / NP-COMPLETENESS / GRAPH COMPLEMENT</div>
+<h1>Figure 34.15 — Clique becomes vertex cover.</h1>
+<p>Source: Cormen, Leiserson, Rivest &amp; Stein, <em>Introduction to Algorithms</em>, 2nd ed., <strong>Figure 34.15</strong>; ENEE 641 <em>Chapter34Nov5-2026.pptx</em>, slide 31. The default reconstructs the source six-vertex graph and its clique/cover witness. All lines and positions are newly drawn.</p>
+<section class="panel"><div class="controls"><label for="example">Example</label>
+<select id="example"><option value="source">Figure 34.15 — source graph</option><option value="pendant">Practice — triangle with pendant</option><option value="cycle">Practice — four-cycle</option></select>
+<button type="button" id="source-reset">Reset to Figure 34.15</button>
+</div><p id="provenance">Source graph — original rendering.</p>
+<h2>Select vertices as a proposed clique in G</h2>
+<div id="vertex-checks" class="checkboxes" role="group" aria-label="Proposed clique vertex selection"></div>
+<div class="controls">
+<button id="reset" type="button">Reset current example</button>
+<button id="find" type="button">Find clique of selected size</button>
+<button id="previous" type="button">Previous step</button>
+<button id="next" type="button">Next step</button>
+<button id="all" type="button">Verify full reduction</button>
+</div>
+<output id="step" aria-live="polite"></output></section>
+<div class="dual">
+<section class="panel"><h2>G — original graph</h2><svg id="original" viewBox="0 0 540 460" role="img" aria-label="Original graph with proposed clique vertices highlighted"></svg><p>Teal nodes are proposed members of the clique. Every pair must have an edge.</p></section>
+<section class="panel"><h2>Complement of G</h2><svg id="complement" viewBox="0 0 540 460" role="img" aria-label="Complement graph with candidate vertex cover highlighted"></svg><p>Orange nodes are the remaining vertices, forming the proposed cover. Every complement edge must have at least one orange endpoint.</p></section>
+</div>
+<section class="panel"><output id="result" aria-live="polite"></output><p class="legend"><span style="color:#2dd4bf">● Proposed clique in G</span><span style="color:#fb923c">● Complement vertex cover</span><span style="color:#ef4444">● Invalid witness</span></p></section>
+<section class="panel" id="proof">
+<h2>Why the equivalence holds for every subset</h2>
+<p>Take a graph G with n vertices and choose any subset K of k vertices. Its complement graph has an edge precisely where G does not. Therefore <strong>K is a k-clique in G if and only if V \ K is a vertex cover of size n−k in the complement of G.</strong></p>
+<p>If K is a clique, no complement edge can have both endpoints in K; each complement edge is touched by V \ K. Conversely, if V \ K covers every complement edge, every pair of vertices inside K must be joined in G. This is the entire reduction and works in both directions.</p>
+<p>The source example has clique {u,v,x,y} and complement cover {w,z}. The two alternative graphs are original practice cases. A candidate that is not a clique gives a complement candidate that is not a cover: experiment by unchecking and checking vertices.</p>
+<p>See also <a href="./clique-cover.html">Figure 34.14: 3-CNF-SAT → CLIQUE</a> and <a href="./reductions-map.html">Figure 34.13: reduction map</a>.</p>
+</section></main>
+<script type="module">
+import {figureGraphs,complementEdges,analyzeComplementCover,findClique,edgeKey} from './figure34-15-engine.js';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';
+let data,selected=[],stage=0;
+function item(tag,attrs,parent){const e=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));parent.append(e);return e}
+function setExample(){data=figureGraphs[$('example').value];selected=[...data.initialClique];stage=0;$('provenance').textContent=data.provenance;renderChecks();draw()}
+function renderChecks(){
+ const root=$('vertex-checks');root.replaceChildren();
+ data.labels.forEach((label,i)=>{
+  const holder=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=selected.includes(i);
+  input.setAttribute('aria-label','Include vertex '+label+' in proposed clique');
+  input.addEventListener('change',()=>{
+   selected=input.checked?[...selected,i].sort((a,b)=>a-b):selected.filter(v=>v!==i);
+   stage=3;renderChecks();draw();
+  });
+  holder.append(input,document.createTextNode('Vertex '+label));root.append(holder);
+ });
+}
+function drawGraph(root,edges,mode,analysis){
+ const svg=$(root);svg.replaceChildren(),chosen=new Set(selected),cover=new Set(analysis.coverVertices);
+ const failedEdges=new Set(analysis.complementEdges.filter(([u,v])=>!cover.has(u)&&!cover.has(v)).map(e=>edgeKey(...e)));
+ for(const [u,v] of edges){
+  const [x1,y1]=data.positions[u],[x2,y2]=data.positions[v];
+  const danger=mode==='complement'&&stage>=3&&failedEdges.has(edgeKey(u,v));
+  const line=item('line',{x1,y1,x2,y2,stroke:danger?'#f87171':'#8294ac','stroke-width':danger?5:2.6},svg);
+  item('title',{},line).textContent=data.labels[u]+'—'+data.labels[v]+(danger?' (uncovered edge)':'');
+ }
+ data.positions.forEach(([cx,cy],i)=>{
+  const highlight=mode==='original'?stage>=1&&chosen.has(i):stage>=2&&cover.has(i);
+  const color=highlight?(mode==='original'?'#0f766e':'#bc572a'):'#243f5d';
+  const node=item('circle',{cx,cy,r:23,fill:color,stroke:highlight?'#fff':'#d7e3f2','stroke-width':highlight?4:2},svg);
+  item('title',{},node).textContent='Vertex '+data.labels[i];
+  const t=item('text',{x:cx,y:cy+6,fill:'#fff','font-size':19,'text-anchor':'middle','font-weight':'bold'},svg);t.textContent=data.labels[i];
+ });
+}
+function draw(){
+ const result=analyzeComplementCover(data,selected),comp=result.complementEdges;
+ drawGraph('original',data.edges,'original',result);
+ drawGraph('complement',comp,'complement',result);
+ const messages=[
+  'Step 0: inspect G, its complement and the proposed subset K.',
+  'Step 1: highlight the selected vertices K in G. A clique requires every pair in K to be connected.',
+  'Step 2: take V \\ K in the complement graph, giving exactly n−k candidate cover vertices.',
+  'Step 3: verify all pairs in K and every edge of the complement graph.'
+ ];
+ $('step').textContent=messages[stage];
+ const chosenNames=selected.map(i=>data.labels[i]).join(', ')||'(empty)',coverNames=result.coverVertices.map(i=>data.labels[i]).join(', ')||'(empty)';
+ $('result').textContent='K = {'+chosenNames+'} (size '+result.cliqueSize+'). Complement candidate V \\ K = {'+coverNames+'} (size '+result.coverSize+'). '+(stage===3?('Clique valid: '+result.clique+'. Complement vertex cover valid: '+result.cover+'. Equivalence holds: '+(result.clique===result.cover)+'.'):'Advance to see the proof checks.');
+ $('previous').disabled=stage===0;$('next').disabled=stage===3;$('all').disabled=stage===3;
+}
+$('example').addEventListener('change',setExample);
+$('source-reset').addEventListener('click',()=>{$('example').value='source';setExample()});
+$('reset').addEventListener('click',setExample);
+$('find').addEventListener('click',()=>{
+ const candidate=findClique(data,selected.length);
+ if(candidate){selected=candidate;renderChecks();stage=3;draw();}
+ else{$('step').textContent='No clique of size '+selected.length+' exists in the selected graph.';}
+});
+$('previous').addEventListener('click',()=>{stage=Math.max(0,stage-1);draw()});
+$('next').addEventListener('click',()=>{stage=Math.min(3,stage+1);draw()});
+$('all').addEventListener('click',()=>{stage=3;draw()});
+setExample();
+</script></body></html>
