@@ -1,0 +1,46 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Augmented Search Trees | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1150px;margin:auto;padding:38px 18px 90px}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:18px 0}p{line-height:1.6}.panel{background:var(--surface,#1e293b);color:var(--text,#f1f5f9);border:1px solid var(--line,#64748b);border-radius:15px;padding:20px;margin:17px 0}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}.controls input{max-width:120px}input,button{border:1px solid #94a3b8;border-radius:8px;background:#253a56;color:white;padding:10px}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #fcd34d;outline-offset:3px}
+.visual{overflow:auto;background:#101f31;padding:25px 12px;min-height:150px;border-radius:10px}.node{display:flex;align-items:center;flex-direction:column;gap:16px;min-width:max-content}.node-label{padding:9px 14px;background:#204362;border:2px solid #94a3b8;border-radius:8px;color:white;font-weight:bold;text-align:center}.node-label.visited{background:#985a11;border-color:#fbbf24}.node-label.found{background:#0c806d;border-color:#99f6e4}
+.children{display:flex;gap:20px;align-items:flex-start;justify-content:center;border-top:1px dashed #768498;padding-top:15px}.children>.node{position:relative}.children>.node:before{content:"";position:absolute;top:-15px;height:14px;border-left:2px solid #768498}output{display:block;border:1px solid #64748b;padding:12px;border-radius:9px;line-height:1.6;margin:12px 0}
+.steps{display:flex;flex-wrap:wrap;gap:8px}.steps span{border:1px solid #7c8da0;border-radius:8px;padding:8px}
+@media(max-width:700px){.children{gap:9px}.node-label{padding:8px 9px}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course</a><a href="#proof">Explanation</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main class="lab" id="main"><div class="section-label">CHAPTER 14 / AUGMENTING DATA STRUCTURES</div><h1>Small extra fields. Powerful queries.</h1><p>Subtree sizes enable order statistics, while the maximum upper endpoint in an interval subtree lets a search skip branches safely. These are static balanced search trees illustrating the lecture's augmentation invariants—not full dynamic red-black tree insertion/deletion implementations.</p>
+<section class="panel"><h2>Order statistics — i-th smallest element</h2><div class="controls"><label for="rank">Select rank i</label><input id="rank" type="range" min="1" max="9" value="5"><strong id="rank-value">5</strong><label for="rank-key">Find rank of key</label><input id="rank-key" type="number" value="24" step="4"></div>
+<div class="visual" id="order-tree" role="img" aria-label="Balanced BST with subtree sizes; search path highlighted"></div>
+<output id="order-output" aria-live="polite"></output><div class="steps" id="order-steps"></div>
+<p>At each node x, r = size(left[x]) + 1 is x's rank within its subtree. Select left if i &lt; r, return x if i = r, or select right with rank i − r. Finding a key's global rank adds left-subtree sizes when moving right.</p></section>
+<section class="panel"><h2>Interval tree — search for any overlap</h2><p>The intervals are closed, so touching at an endpoint counts as an overlap. Each node stores max, the greatest upper endpoint anywhere in its subtree.</p>
+<div class="controls"><label for="low">Query low</label><input id="low" type="number" value="11"><label for="high">Query high</label><input id="high" type="number" value="13"><button id="search" type="button">Search overlaps</button></div>
+<div class="visual" id="interval-tree" role="img" aria-label="Balanced interval search tree with subtree maximum and searched path highlighted"></div>
+<output id="interval-output" aria-live="polite"></output><div class="steps" id="interval-steps"></div>
+<p>If the current interval does not overlap the query, search left when max[left] ≥ query.low; otherwise search right. The stored maximum lets us rule out a whole left subtree when every interval there ends before the query begins.</p></section>
+<section class="panel" id="proof"><h2>Augmentation versus rebalancing</h2><p>For size augmentation, <strong>size[x] = size[left[x]] + size[right[x]] + 1</strong>. For interval augmentation, <strong>max[x] = max(high[x],max[left[x]],max[right[x]])</strong>. A balanced tree has O(log n) height, so both queries take O(log n) time. A production red-black tree must maintain these fields during rotations, inserts, and deletes; this demonstration intentionally isolates query logic on fixed balanced trees.</p>
+<p><strong>Source:</strong> ENEE 641, <em>Chapter14Oct1b-2026.pptx</em>, dynamic order statistics, subtree sizes and ranks, interval overlap and interval-search branching rule. Tree layouts and intervals are independently created; not textbook artwork.</p></section></main>
+<script type="module">
+import {orderTree,osSelect,osRank,intervalTree,intervalSearch,keys,intervals,overlaps} from './augmented-trees-engine.js';
+const $=id=>document.getElementById(id),order=orderTree(keys),interval=intervalTree(intervals);
+function renderTree(root,target,visited,found,labelFn){
+ const holder=$(target);holder.replaceChildren();
+ function make(n){if(!n){const gap=document.createElement('div');gap.style.minWidth='25px';return gap}
+  const wrap=document.createElement('div');wrap.className='node';const box=document.createElement('div');box.className='node-label'+(found===n.key||found===n.id?' found':visited.has(n.key??n.id)?' visited':'');box.textContent=labelFn(n);wrap.append(box);
+  if(n.left||n.right){const children=document.createElement('div');children.className='children';children.append(make(n.left),make(n.right));wrap.append(children)}return wrap}
+ holder.append(make(root));
+}
+function chips(holder,entries){$(holder).replaceChildren();entries.forEach(s=>{const span=document.createElement('span');span.textContent=s;$(holder).append(span)})}
+function orderDraw(){const k=Number($('rank').value),key=Number($('rank-key').value),sel=osSelect(order,k),rank=osRank(order,key),visited=new Set(sel.trace.map(x=>x.key));
+ $('rank-value').textContent=k;renderTree(order,'order-tree',visited,sel.found,n=>n.key+' [size '+n.size+']');
+ $('order-output').textContent='The '+k+'-th smallest key is '+sel.found+'. '+(rank.rank!==null?'Key '+key+' has global rank '+rank.rank+'.':'Key '+key+' is absent.');
+ chips('order-steps',sel.trace.map(x=>'At '+x.key+': left size '+x.leftSize+', relative rank '+x.relative+', target '+x.target));
+}
+$('rank').addEventListener('input',orderDraw);$('rank-key').addEventListener('change',orderDraw);
+function intervalDraw(){const low=Number($('low').value),high=Number($('high').value);
+ if(!Number.isFinite(low)||!Number.isFinite(high)||low>high){$('interval-output').textContent='Enter a valid interval with low ≤ high.';return;}
+ const result=intervalSearch(interval,[low,high]),visited=new Set(result.trace.map(x=>x.id));
+ renderTree(interval,'interval-tree',visited,result.found?.id,n=>'['+n.interval.join(',')+'] max '+n.max);
+ $('interval-output').textContent=result.found?'Overlapping interval found: ['+result.found.interval.join(', ')+']; overlap verified = '+overlaps(result.found.interval,[low,high])+'.':'No interval overlaps ['+low+', '+high+'].';
+ chips('interval-steps',result.trace.map(x=>'Visit ['+x.interval.join(',')+'], left max = '+(x.leftMax===-Infinity?'−∞':x.leftMax)));
+}
+$('search').addEventListener('click',intervalDraw);$('low').addEventListener('change',intervalDraw);$('high').addEventListener('change',intervalDraw);orderDraw();intervalDraw();
+</script></body></html>
