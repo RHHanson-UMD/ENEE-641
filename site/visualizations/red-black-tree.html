@@ -1,0 +1,40 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Red-black tree insertion | ENEE 641</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>.lab{max-width:1150px;margin:auto;padding:38px 18px 90px}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:18px 0}p{line-height:1.6}.panel{background:var(--surface,#1e293b);color:var(--text,#e2e8f0);border:1px solid var(--line,#64748b);border-radius:15px;padding:20px;margin:17px 0}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:12px 0}
+input,button,select{border:1px solid #94a3b8;border-radius:8px;background:#223b57;color:white;padding:10px}button{cursor:pointer}button:disabled{opacity:.45}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fcd34d;outline-offset:3px}
+.tree-wrap{overflow:auto;background:#102032;border-radius:11px;padding:24px 12px;min-height:210px}.tree{display:flex;flex-direction:column;align-items:center;gap:20px;min-width:max-content}.node{display:flex;justify-content:center;align-items:center;min-width:44px;min-height:44px;border-radius:50%;border:2px solid white;font-weight:700;color:white}
+.node.red{background:#c0393d}.node.black{background:#101820}.children{display:flex;align-items:flex-start;justify-content:center;gap:24px;border-top:2px dashed #657b94;padding-top:19px}.children>.tree{position:relative}.children>.tree:before{content:"";position:absolute;top:-19px;height:18px;border-left:2px solid #657b94}.nil{font-size:.75rem;color:#cbd5e1;border:1px dashed #94a3b8;border-radius:6px;padding:6px}
+output{display:block;border:1px solid #64748b;border-radius:9px;padding:12px;line-height:1.6;margin:12px 0}#events li{margin:7px 0}
+@media(max-width:750px){.children{gap:12px}.node{min-width:36px;min-height:36px}}</style></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../">Course</a><a href="#proof">Properties</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header>
+<main id="main" class="lab"><div class="section-label">CHAPTER 13 / RED-BLACK TREES</div><h1>Rebalance with colors and rotations.</h1><p>Insert keys into a red-black binary search tree. Watch repairs for a red uncle, an inside child, and an outside child. Black NIL leaves are implicit at missing child pointers.</p>
+<section class="panel"><div class="controls"><label for="preset">Insertion sequence</label><select id="preset"><option value="mixed">Mixed insertions</option><option value="ascending">Ascending 1–10</option><option value="zigzag">Zigzag insertions</option></select>
+<button id="prev" type="button">Previous</button><button id="next" type="button">Insert next</button><button id="all" type="button">Insert all</button><button id="reset" type="button">Reset</button></div>
+<div class="controls"><label for="custom">Append integer</label><input type="number" id="custom" value="42" step="1" style="max-width:120px"><button id="add" type="button">Append key</button></div>
+<output id="state" aria-live="polite"></output></section>
+<section class="panel"><h2>Tree after this insertion</h2><div id="tree" class="tree-wrap" role="img" aria-label="Red and black tree nodes with implicit NIL leaves"></div><p id="counts"></p><h2>Repair events</h2><ol id="events"></ol></section>
+<section class="panel" id="proof"><h2>Invariants and the logarithmic height guarantee</h2><p>A red-black tree is a binary search tree in which every internal node is red or black, the root and all NIL leaves are black, no red node has a red child, and every path from any node to its descendant NIL leaves has the same black-node count. These conditions imply that no root-to-leaf path is more than twice as long as another and that the height is at most 2 log₂(n+1).</p>
+<p>Insertion first uses the ordinary BST rule, coloring the new node red. If its parent is also red, three standard cases resolve the violation: red uncle → recolor; black uncle with an inside child → rotate toward the outside case; black uncle with an outside child → recolor and rotate around the grandparent. The tree's key order is preserved by rotations.</p><p>This module implements insertion only. The Chapter 13 slides also discuss deletion, which requires separate fix-up logic. Source: ENEE 641, <em>Chapter13Sept29-2026.pptx</em>, red-black properties, Lemma 13.1, rotation and insertion repair cases. Original generated trees—not copies of the slide figures.</p></section></main>
+<script type="module">
+import {build,verify} from './red-black-engine.js';
+const $=id=>document.getElementById(id);
+const presets={mixed:[10,20,30,15,25,5,1,6,14,16],ascending:[1,2,3,4,5,6,7,8,9,10],zigzag:[20,10,30,5,15,25,35,1,7,13,17]};
+let keys=[],states=[],step=0;
+function setup(){keys=[...presets[$('preset').value]];rebuild(0)}
+function rebuild(next){states=build(keys).states;step=Math.max(0,Math.min(next,keys.length));render()}
+function make(n,depth=0){const wrap=document.createElement('div');wrap.className='tree';
+ if(!n){const nil=document.createElement('div');nil.className='nil';nil.textContent='NIL';wrap.append(nil);return wrap}
+ const node=document.createElement('div');node.className='node '+(n.color==='R'?'red':'black');node.textContent=n.key;node.title=(n.color==='R'?'Red':'Black')+' key '+n.key;wrap.append(node);
+ if((n.left||n.right)&&depth<20){const children=document.createElement('div');children.className='children';children.append(make(n.left,depth+1),make(n.right,depth+1));wrap.append(children)}
+ return wrap;
+}
+function render(){
+ const s=states[step],v=verify(s.tree);$('tree').replaceChildren();$('tree').append(make(s.tree));
+ $('state').textContent=step?'After inserting '+s.key+': '+s.events.join(' '):'Empty tree; NIL sentinel is black.';
+ $('counts').textContent='Internal nodes '+v.size+'; height '+v.height+'; black height '+v.blackHeight+' (including NIL); properties '+(v.valid?'VALID':'FAILED: '+v.reason)+'.';
+ $('events').replaceChildren();s.events.forEach(e=>{const li=document.createElement('li');li.textContent=e;$('events').append(li)});
+ $('prev').disabled=step===0;$('next').disabled=step===keys.length;$('all').disabled=step===keys.length;
+}
+$('preset').addEventListener('change',setup);$('prev').addEventListener('click',()=>{step--;render()});$('next').addEventListener('click',()=>{step++;render()});$('all').addEventListener('click',()=>{step=keys.length;render()});$('reset').addEventListener('click',setup);
+$('add').addEventListener('click',()=>{const k=Number($('custom').value);if(!Number.isSafeInteger(k)){$('state').textContent='Enter a safe integer.';return}keys=keys.slice(0,step);keys.push(k);rebuild(keys.length)});
+setup();
+</script></body></html>
