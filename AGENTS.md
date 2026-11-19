@@ -16,6 +16,14 @@ For claims about a course figure, proof, lecture or textbook section, privately 
 
 For every interactive source-inspired figure, provide an independently drawn visualization, explicitly distinguish an accurately verified **source seed** from original alternative examples, and test default, changed-input, reset and failure/edge states. Check invariant/proof steps and the limits of every claimed reduction or algorithm.
 
+## Required source precedence and edition choice
+
+**Instructor lecture slides are authoritative for this ENEE 641 learning companion.** For what the course teaches, follow the exact lecture deck's topics, notation, mathematical input data, graph structure, figures, theorem statements, assumptions, examples, and slide order; do not silently replace, correct, or expand them with a textbook version. If a slide is ambiguous or appears inconsistent, document the discrepancy and verify it rather than silently changing the lecture example.
+
+**Prefer CLRS (*Introduction to Algorithms*), 3rd edition** for additional section references, conceptual context, and terminology **when consistent with the slides**. Slides sometimes come from CLRS 2nd edition, and figure numbers and details may differ by edition. In that case preserve the lecture figure and its actual slide/2nd-edition identifier, and supply a separately verified 3rd-edition cross-reference only when known. Never relabel a 2nd-edition figure as a 3rd-edition figure without inspecting the 3rd-edition source. Do not claim an unverified cross-edition correspondence.
+
+For every source-backed lesson, record `lecture deck + slide number` as primary provenance; add `CLRS edition + verified figure/section` as secondary provenance. Original practice examples may go beyond the slides but must be explicitly labeled **independent practice**, not instructor-covered content. Do not redistribute copyrighted figures, slides, or textbook extracts.
+
 ## Public rights and private source controls
 
 Never upload private Google Drive/ELMS PDFs or URLs, paid textbook figures, instructor photos/slides/transcripts, restricted homework solutions, professor answer keys, unreleased exam questions, student data, access tokens or other credentials into a public branch, PR, issue, comment, test fixture, build artifact or GitHub Pages. Release of a solution does **not** authorize public redistribution. Check rights independently; cite source identifiers without reproducing restricted images. General-purpose synthetic proofs, examples and original schematics are preferred.
