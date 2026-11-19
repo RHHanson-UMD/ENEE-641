@@ -24,7 +24,7 @@ for (const file of targets) {
 }
 test('Chapter-first catalog contains all known early topics and separate exam guides',()=>{
  const html=readFileSync(resolve(site,'index.html'),'utf8');
- const nums=[1,2,3,4,6,7,8,9,11,12,13,14,15,16,18,22,23,24,25,34,35];
+ const nums=[1,2,3,4,6,7,8,9,11,12,13,14,15,16,17,18,22,23,24,25,34,35];
  for(const n of nums)assert.match(html,new RegExp('id="chapter-'+n+'"'));
  assert.equal((html.match(/<details class="chapter-group"/g)||[]).length,nums.length);
  assert.equal((html.match(/<\/details>/g)||[]).length,nums.length);
