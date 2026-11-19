@@ -44,3 +44,21 @@
 .resources-prompt strong{font:600 19px 'Space Grotesk'}.resources-prompt p{font-size:13px;color:var(--muted);margin:5px 0 0}
 @media(max-width:800px){.course-hero-grid{grid-template-columns:1fr;gap:25px}.course-poster{min-height:200px}.poster-visual{height:55px}.path-grid{grid-template-columns:1fr}.path-card{min-height:175px}.path-card h3{margin-top:18px}}
 @media(max-width:600px){.course-hero{padding:60px 0 48px}.course-title{font-size:42px}.topics{grid-template-columns:1fr}.demo-card,.resources-prompt{flex-direction:column;align-items:start}.demo-btn{width:100%;text-align:center}}
+
+/* Accessible chapter-first explorer catalog, with no JavaScript dependency. */
+.chapter-catalog{display:grid;gap:14px;margin-top:29px}
+.chapter-group{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.chapter-group[open]{border-color:var(--mint)}
+.chapter-group>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 26px;cursor:pointer}
+.chapter-group>summary::-webkit-details-marker{display:none}
+.chapter-group>summary:hover{background:var(--surface2)}
+.chapter-group>summary:focus-visible{outline:3px solid var(--mint);outline-offset:-4px;border-radius:12px}
+.chapter-name{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.chapter-number{font:700 11px 'Space Grotesk',sans-serif;letter-spacing:.11em;color:var(--mint)}
+.chapter-name strong{font:600 20px/1.35 'Space Grotesk',sans-serif}
+.chapter-count{font-size:12px;color:var(--muted);white-space:nowrap}
+.chapter-chevron{display:inline-block;font-size:21px;margin-left:8px;transition:transform .2s}
+.chapter-group[open] .chapter-chevron{transform:rotate(180deg)}
+.chapter-lessons{display:grid;gap:12px;border-top:1px solid var(--line);padding:18px}
+.chapter-lessons .demo-card{margin:0;border-color:var(--line);background:var(--bg)}
+@media(max-width:600px){.chapter-group>summary{padding:17px;align-items:flex-start}.chapter-name{gap:5px;flex-direction:column}.chapter-name strong{font-size:17px}.chapter-lessons{padding:12px}.chapter-count{font-size:11px}}
