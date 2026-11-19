@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exam 2 — original practice exam and algorithm lab | ENEE 641</title>
+<meta name="description" content="Original ENEE 641 Exam 2 practice: graph algorithms, shortest paths, MST proofs, NP-completeness and approximation, with self-check rubrics.">
+<link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script>
+<style>
+.exam{max-width:1050px;margin:auto;padding:36px 20px 90px}
+.exam h1{font:700 clamp(34px,5vw,56px)/1.12 'Space Grotesk',sans-serif;letter-spacing:-.035em;margin:15px 0}
+.exam h2{margin:34px 0 14px;font-size:27px}.exam h3{margin:15px 0 9px}
+.exam p,.exam li{line-height:1.65;color:var(--muted)}
+.eyebrow{font-size:12px;letter-spacing:.11em;color:var(--mint);font-weight:700}
+.lead{font-size:18px}.scope,.method{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:20px;margin:22px 0}
+.method{border-left:4px solid var(--mint)}
+.exam a{text-decoration:underline;text-underline-offset:3px}
+.pills{display:flex;flex-wrap:wrap;gap:9px}.pills a{border:1px solid var(--line);padding:7px 11px;border-radius:8px;text-decoration:none}
+.pills a:hover{border-color:var(--mint)}
+.priority{width:100%;border-collapse:collapse;font-size:14px;margin:16px 0}
+.priority th,.priority td{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid var(--line)}
+.priority th{color:var(--ink)}.priority td:first-child{font-weight:700;color:var(--mint)}
+.question{border:1px solid var(--line);background:var(--surface);padding:22px;border-radius:14px;margin:20px 0}
+.question header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.question header h3{margin:0}.minutes{color:var(--mint);font-size:12px;font-weight:700;white-space:nowrap}
+.problem{padding:13px 0}
+.answer-label{display:block;color:var(--ink);font-weight:700;margin:14px 0 6px}
+.answer{background:var(--surface2);border:1px solid var(--line);color:var(--ink);width:100%;min-height:105px;resize:vertical;padding:12px;border-radius:8px}
+.answer:focus-visible,.exam input:focus-visible,.exam button:focus-visible,.exam select:focus-visible,.exam textarea:focus-visible,.exam summary:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+.solution{border:1px solid var(--line);border-radius:10px;margin:16px 0;background:var(--surface2)}
+.solution summary{cursor:pointer;padding:13px 15px;font-weight:700;color:var(--ink)}.solution .sol-inner{padding:0 15px 15px}.solution ol,.solution ul{padding-left:25px}
+.criteria{border-top:1px solid var(--line);margin:14px 0 0;padding:13px 0 0;display:grid;gap:8px}
+.criteria legend{font-weight:700;margin-bottom:8px}
+.criteria label{display:flex;gap:9px;align-items:flex-start;line-height:1.4;color:var(--muted);font-size:14px}
+.criteria input{accent-color:var(--mint);margin-top:3px}
+.lab{border:1px solid var(--line);padding:20px;border-radius:12px;background:var(--surface);margin:20px 0}
+.lab-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0}
+.lab-controls label{display:flex;align-items:center;gap:8px}
+.lab button,.lab select,.lab input,.exam .clear-button{padding:9px 11px;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;font:inherit}
+.lab textarea{width:100%;min-height:110px;resize:vertical;border-radius:8px;padding:12px;background:var(--surface2);border:1px solid var(--line);color:var(--ink);font:14px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+.lab output{display:block;background:var(--surface2);border-radius:9px;padding:13px;margin:12px 0;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--ink)}
+.lab .hint,.fine{font-size:13px;color:var(--faint)!important}
+.scoreline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);padding:16px;border:1px solid var(--line);border-radius:10px}
+.scoreline strong{font-size:20px;color:var(--ink)}.scoreline .clear-button{margin-left:auto;cursor:pointer}
+.further{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.further>a{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.further>a:hover{border-color:var(--mint)}
+@media(max-width:660px){.exam{padding:25px 15px 65px}.priority{font-size:12px}.priority th,.priority td{padding:7px}.question,.lab{padding:14px}.question header{display:block}.minutes{display:block;margin-top:7px}.further{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="container nav-row">
+<a class="brand" href="../">ENEE 641 / Learning Lab</a>
+<nav class="site-nav"><a href="../">Course chapters</a><a href="exam-2.html">Exam 2 review</a></nav>
+<div class="nav-actions"><button id="theme-toggle" class="theme-button" aria-label="Toggle theme">☾</button></div>
+</div></header>
+<main class="exam" id="main">
+<div class="eyebrow">ENEE 641 / SECOND MIDTERM / ORIGINAL PRACTICE</div>
+<h1>Exam 2: design, prove, analyze</h1>
+<p class="lead">A demanding closed-notes practice set based on the verified course lectures and the <em>format and assessment skills</em> of a historical midterm—not copies of its questions or solution key.</p>
+<div class="scope">
+<p><strong>Scheduled exam:</strong> December 1, 2026 (Fall 2026 syllabus). A previous second midterm used a 100-minute, closed-book format. The five problems below are an <strong>optional 100-minute simulation</strong>; current exam length, question selection and weights are not confirmed.</p>
+<p><strong>Evidence policy:</strong> Instructor slides control what is taught; CLRS 3rd edition is the preferred supplemental reference. The historical sample was examined privately. All question wording, inputs and answer explanations below are independently authored. Chapter 35 is included because its lecture deck exists and was introduced before the scheduled exam; final instructor coverage may change.</p>
+</div>
+<nav class="pills" aria-label="This page"><a href="#priorities">Study priorities</a><a href="#answer-method">Answer method</a><a href="#mock">100-minute mock</a><a href="#route-lab">Shortest-path lab</a><a href="#mst-lab">MST cut lab</a><a href="#cumulative">Optional cumulative</a><a href="#score">Self-score</a></nav>
+
+<section id="priorities">
+<h2>Prioritize transferable problem-solving skills</h2>
+<p>This is an <strong>evidence-informed study order, not a prediction</strong> of the 2026 exam. The previous exam emphasized invention, proofs and boundary cases. The lecture decks establish these concepts:</p>
+<table class="priority"><thead><tr><th>Priority</th><th>Skill</th><th>Lecture basis</th><th>Mastery test</th></tr></thead><tbody>
+<tr><td>First</td><td>DFS, low-link arguments, graph invariants</td><td>Chapter 22, slides 9–19</td><td>Explain exactly why a tree edge is a bridge or why a DFS child separates its parent.</td></tr>
+<tr><td>First</td><td>Weighted paths and algorithm modifications</td><td>Chapter 24, slides 4–9; Chapter 25, slides 2–7</td><td>Specify a correct state, relaxation, assumption and proof for a changed path objective.</td></tr>
+<tr><td>First</td><td>Cut/exchange proofs for MSTs</td><td>Chapter 23, slides 3–12</td><td>Prove or refute a structural claim with a fully specified graph.</td></tr>
+<tr><td>First</td><td>NP-completeness certificates and reductions</td><td>Chapter 34, slides 10–21, 28–39</td><td>Produce a polynomial mapping with a complete yes-if-and-only-if-yes argument.</td></tr>
+<tr><td>Next</td><td>Approximation bounds and assumptions</td><td>Chapter 35, slides 2–15</td><td>Derive the matching lower bound, metric TSP shortcut inequality, and ratio convention.</td></tr>
+<tr><td>Revisit</td><td>Earlier-course algorithmic techniques</td><td>Chapter 8, slides 2–10; Chapters 15–16</td><td>Explain stability, noncomparison sorting, and recurrence-based algorithm design.</td></tr>
+</tbody></table>
+</section>
+<section id="answer-method">
+<h2>A repeatable answer structure</h2>
+<div class="method"><p>For <strong>every</strong> algorithm-design or proof question, write these five parts in order:</p>
+<ol>
+<li><strong>Model and assumptions:</strong> directed/undirected, nonnegative/real weights, input size and required output.</li>
+<li><strong>Algorithm:</strong> state variables, initialization, data structure, transitions/loop, and reconstruction of any witness.</li>
+<li><strong>Correctness:</strong> a precise invariant or exchange/reduction argument, base case and induction/contradiction step.</li>
+<li><strong>Running time:</strong> operations counted separately and a justified bound (not just “fast”).</li>
+<li><strong>Limits:</strong> unreachable states, ties, cycles, invalid assumptions, or a counterexample.</li>
+</ol><p class="fine">Study technique: attempt each problem without notes, then open its solution. The self-check rubric is a reflection aid, not an official score.</p></div>
+</section>
+<section id="mock">
+<h2>Original five-question practice exam</h2>
+<p>Recommended self-practice pacing: 18 + 27 + 19 + 22 + 14 = 100 minutes. Write answers in the optional text fields; nothing is transmitted or saved by this page. Reveal solutions after attempting the problem.</p>
+<section class="question" id="q1"><header><h3>1. Resilient network links</h3><span class="minutes">18 minutes / Chapter 22</span></header>
+<div class="problem"><p>A connected undirected communication network has vertices {p,q,r,s,t,u}, with edges {pq, qr, rp, rs, st, tu, us}. A link is <em>critical</em> if removing that edge increases the number of connected components. Identify the critical links and design an algorithm to find every critical link in any undirected graph. State the bound for an adjacency-list representation and justify correctness.</p></div>
+<label for="answer1" class="answer-label">Your algorithm, invariant, complexity and proof</label><textarea class="answer" id="answer1" aria-label="Your response to problem 1"></textarea>
+<details class="solution"><summary>Reveal original worked solution and failure cases</summary><div class="sol-inner">
+<ol><li>For the supplied graph, rs is the only critical edge: the pqr and stu triangles each remain connected internally, but the two triangles share only rs.</li>
+<li>Run DFS in every connected component. Store discovery time d[u] and low[u], the earliest discovery reachable from u's DFS subtree using zero or more tree edges and at most one back edge.</li>
+<li>For every DFS tree edge (u,v), report it exactly when low[v] &gt; d[u]. If low[v] ≤ d[u], a back edge reconnects v's subtree to u or an ancestor, so removing (u,v) does not separate it. Otherwise the DFS tree edge is the only connection from that subtree to the rest.</li>
+<li>Time Θ(|V|+|E|), space O(|V|) auxiliary beyond adjacency lists. A DFS forest handles disconnected inputs; the rule is for undirected graphs, with each parent edge excluded from a child's back-edge calculation.</li></ol>
+<p><strong>Counterexample to a common shortcut:</strong> Every DFS tree edge is not a bridge. The three edges of a cycle are tree/back edges under some DFS order, but none is a bridge.</p>
+<p><a href="../visualizations/graph-structure.html">Check the idea in the Chapter 22 connectivity explorer</a>.</p>
+</div></details>
+<fieldset class="criteria"><legend>Self-check (4 marks)</legend><label><input type="checkbox" class="rubric-check">Correctly identify critical link(s)</label><label><input type="checkbox" class="rubric-check">Define the discovery/low-link computation</label><label><input type="checkbox" class="rubric-check">Prove both directions of the bridge test</label><label><input type="checkbox" class="rubric-check">Give Θ(V+E), handling disconnected/edge cases</label></fieldset>
+</section>
+<section class="question" id="q2"><header><h3>2. One-use discount on a directed route</h3><span class="minutes">27 minutes / Chapter 24</span></header>
+<div class="problem"><p>In a directed graph with <strong>nonnegative integer</strong> edge costs, you may traverse at most one edge free of charge. Find a minimum-cost route from source s to destination t, including which edge uses the discount, or report that t is unreachable. Design an efficient algorithm. Explain why a single “best distance” at each vertex loses information and derive a rigorous time bound.</p>
+<p>Independent input: s→a (3), a→t (9), s→b (8), b→t (4), a→b (1). Try it in the interactive lab below.</p></div>
+<label for="answer2" class="answer-label">Your state design, algorithm, proof and complexity</label><textarea class="answer" id="answer2" aria-label="Your response to problem 2"></textarea>
+<details class="solution"><summary>Reveal original worked solution and state argument</summary><div class="sol-inner">
+<ol><li>Construct a layered directed graph with vertices (v,0) and (v,1). The second component says whether the free-edge discount has been used.</li>
+<li>For each original edge u→v of cost w≥0, add (u,0)→(v,0) of cost w, (u,0)→(v,1) of cost 0, and (u,1)→(v,1) of cost w. Start at (s,0); choose the cheaper reachable target among (t,0) and (t,1).</li>
+<li>Run Dijkstra on the expanded graph and save predecessor links, including the transition that used the discount. With a binary priority queue, the expanded graph has 2|V| vertices and at most 3|E| edges, so O((V+E) log(V+E)) time and O(V+E) storage; standard decrease-key bounds can be stated as O((V+E)log V).</li>
+<li>Every feasible original path with at most one discount corresponds to a path in the layered graph of equal cost, and every layered path projects to a feasible original walk. All transformed edges are nonnegative, so Dijkstra returns the optimum.</li>
+<li>For the independent input, the optimal path is s→a→t, discounting a→t: 3+0=3. At a, the state “coupon already used” can have cost 0, but the state “coupon still available” has cost 3 and leads to the better final answer. Keeping only the lowest cost at a would discard the latter state.</li></ol>
+<p><strong>Failure cases:</strong> A negative-cost original edge invalidates the Dijkstra guarantee; an unreachable target remains unreachable in both layers. A zero-cost edge is permitted and need not consume the discount.</p></div></details>
+<fieldset class="criteria"><legend>Self-check (4 marks)</legend><label><input type="checkbox" class="rubric-check">Two state layers with precise meaning</label><label><input type="checkbox" class="rubric-check">Correct three transitions, start/target and witness path</label><label><input type="checkbox" class="rubric-check">Bijection/projection correctness argument</label><label><input type="checkbox" class="rubric-check">Correct complexity and assumptions/counterexample</label></fieldset>
+</section>
+<section class="question" id="q3"><header><h3>3. Mandatory edges across a cut</h3><span class="minutes">19 minutes / Chapter 23</span></header>
+<div class="problem"><p>Let G be a connected undirected integer-weighted graph. Prove that if an edge is the <em>unique</em> minimum-weight edge crossing some nontrivial cut (S,V−S), that edge belongs to <strong>every</strong> minimum spanning tree. Does a tie for minimum cut weight imply that no crossing edge can be mandatory? Give a careful reason or counterexample. Explain why Kruskal's algorithm can use this cut fact.</p></div>
+<label for="answer3" class="answer-label">Your exchange proof and tie analysis</label><textarea class="answer" id="answer3" aria-label="Your response to problem 3"></textarea>
+<details class="solution"><summary>Reveal original exchange proof</summary><div class="sol-inner">
+<ol><li>Let e be the unique lightest crossing edge. Suppose an MST T omits e. Adding e creates a cycle. The cycle crosses the cut at least twice, so it contains a different crossing edge f∈T.</li>
+<li>Since e is uniquely lightest, w(e)&lt;w(f). Replace f with e; the result is again a spanning tree of strictly smaller weight, contradicting the minimality of T. Thus every MST includes e.</li>
+<li>When edges tie, the unique-edge proof fails. A four-cycle of four weight-1 edges has multiple MSTs: a cut at any one vertex has two tied crossing edges, and neither is in every MST. <em>However</em>, a tie alone does not prove that each tied edge is optional; other graph constraints can still force an edge.</li>
+<li>Kruskal repeatedly adds a light crossing edge of a cut respecting its current forest, so it preserves the possibility of extending its accepted edges to an MST. With sorting plus disjoint-set checks, O(E log E) time is a valid bound.</li></ol><p><a href="../visualizations/mst.html">Compare with the Chapter 23 Kruskal/Prim explorer</a>.</p>
+</div></details>
+<fieldset class="criteria"><legend>Self-check (4 marks)</legend><label><input type="checkbox" class="rubric-check">Use the cycle created by adding an omitted edge</label><label><input type="checkbox" class="rubric-check">Identify a distinct crossing edge on that cycle</label><label><input type="checkbox" class="rubric-check">Use strict inequality and derive contradiction</label><label><input type="checkbox" class="rubric-check">Handle ties without claiming an invalid converse</label></fieldset>
+</section>
+<section class="question" id="q4"><header><h3>4. A new NP-completeness proof</h3><span class="minutes">22 minutes / Chapter 34</span></header>
+<div class="problem"><p>Define <strong>INDEPENDENT-SET</strong> as the decision problem: given an undirected graph G=(V,E) and integer k, is there a set I⊆V of at least k vertices such that no edge has both endpoints in I? Using the known NP-completeness of VERTEX-COVER, prove that INDEPENDENT-SET is NP-complete. Explicitly state the reduction direction, mapping, certificate, correctness in both directions, and running time.</p>
+<p class="fine">This is an independent application of the lecture's Chapter 34 proof recipe. It is not presented as a specific problem shown in the instructor's slides.</p></div>
+<label for="answer4" class="answer-label">Your certificate, reduction, both directions and time</label><textarea class="answer" id="answer4" aria-label="Your response to problem 4"></textarea>
+<details class="solution"><summary>Reveal original reduction proof</summary><div class="sol-inner">
+<ol><li><strong>Membership in NP:</strong> Certificate I is a list/bit-vector of at least k vertices. Verify its cardinality and scan all edges to confirm that no edge has both endpoints in I. This is polynomial (e.g., O(V+E) with a vertex-membership array).</li>
+<li><strong>Known hard source:</strong> VERTEX-COVER, which is established as NP-complete in the Chapter 34 reduction chain.</li>
+<li><strong>Mapping:</strong> From an instance (G,k) of VERTEX-COVER, output (G,|V|−k) of INDEPENDENT-SET. For the usual decision version with 0≤k≤|V|, this is computed in linear time; out-of-range thresholds can be handled as trivial yes/no instances.</li>
+<li><strong>Forward:</strong> If C covers every edge and |C|≤k, then I=V\C contains no adjacent endpoints and |I|≥|V|−k.</li>
+<li><strong>Reverse:</strong> If I is independent with |I|≥|V|−k, then C=V\I covers every edge and |C|≤k. Hence the instances have identical yes/no answers.</li>
+<li>Therefore VERTEX-COVER ≤ₚ INDEPENDENT-SET, showing NP-hardness; combined with NP membership, INDEPENDENT-SET is NP-complete.</li></ol>
+<p><strong>Typical failure:</strong> Reducing the new problem to a known NP-complete problem only shows that the new problem is no harder; the needed NP-hardness direction goes <em>from</em> a known NP-complete source <em>to</em> the new target.</p>
+<p><a href="../visualizations/reductions-map.html">Trace the verified Chapter 34 reductions</a>.</p>
+</div></details>
+<fieldset class="criteria"><legend>Self-check (4 marks)</legend><label><input type="checkbox" class="rubric-check">Polynomial verifier and certificate</label><label><input type="checkbox" class="rubric-check">Correct known-hard source and mapping direction</label><label><input type="checkbox" class="rubric-check">Two directions of the yes/yes equivalence</label><label><input type="checkbox" class="rubric-check">Complexity, edge cases and NP-completeness conclusion</label></fieldset>
+</section>
+<section class="question" id="q5"><header><h3>5. Where a factor-two guarantee comes from</h3><span class="minutes">14 minutes / Chapter 35</span></header>
+<div class="problem"><p>Run APPROX-VERTEX-COVER on an original star graph with center z and leaves a,b,c,d, choosing the uncovered edge (z,a) first. Give the returned cover, an optimum cover, and the ratio. Then prove that the algorithm's cover has size at most twice optimum for <em>every</em> undirected graph. State the role of a <em>maximal</em> matching (not necessarily a maximum one).</p></div>
+<label for="answer5" class="answer-label">Your example and global bound</label><textarea class="answer" id="answer5" aria-label="Your response to problem 5"></textarea>
+<details class="solution"><summary>Reveal original approximation argument</summary><div class="sol-inner">
+<ol><li>Picking (z,a) adds z and a to the returned cover; all four star edges are then covered. Output size is 2. The optimal cover {z} has size 1, so the ratio is 2.</li>
+<li>The algorithm repeatedly chooses an uncovered edge and adds both endpoints. Because all edges incident to selected endpoints become covered, the chosen edges are pairwise vertex-disjoint: they form a matching M.</li>
+<li>Any vertex cover C* must contain at least one endpoint of each edge in M. Since these chosen edges have no shared vertices, |C*|≥|M|. The algorithm returns 2|M| endpoints, so |C|/|C*|≤2 (for instances with at least one edge).</li>
+<li>The matching is <em>maximal</em>: no additional edge is disjoint from its endpoints when the algorithm stops. It need not be the matching of greatest possible cardinality. The 2-approximation proof needs disjointness, not a maximum matching oracle.</li></ol>
+<p><strong>Boundary:</strong> When G has no edges, both optimum and returned covers are empty, and the approximation claim is vacuous; do not divide by zero.</p><p><a href="../visualizations/vertex-cover.html">Use the Chapter 35 matching explorer</a>.</p></div></details>
+<fieldset class="criteria"><legend>Self-check (4 marks)</legend><label><input type="checkbox" class="rubric-check">Correct star graph output and optimum</label><label><input type="checkbox" class="rubric-check">Argue selected edges form a matching</label><label><input type="checkbox" class="rubric-check">Establish |C*|≥|M| and ratio ≤2</label><label><input type="checkbox" class="rubric-check">Distinguish maximal/maximum and the empty graph</label></fieldset>
+</section>
+</section>
+
+<section id="route-lab" class="lab" aria-labelledby="route-title">
+<h2 id="route-title">Interactive check A: shortest paths with memory</h2>
+<p>Change the directed graph, source or destination. The independent engine uses two state layers and a min-priority queue. The table shows how reaching the <em>same</em> vertex with and without the coupon creates different future possibilities.</p>
+<div class="lab-controls"><label for="route-preset">Example <select id="route-preset"><option value="lecture-inspired">Original worked case</option><option value="zero">Zero-cost edges</option><option value="unreachable">Unreachable target</option></select></label><button type="button" id="route-reset">Reset selected example</button></div>
+<label for="route-edges">Directed edges, one per line: from,to,nonnegative_cost</label>
+<textarea id="route-edges" spellcheck="false">s,a,3
+a,t,9
+s,b,8
+b,t,4
+a,b,1</textarea>
+<div class="lab-controls"><label for="route-source">Source <input id="route-source" value="s" size="5"></label><label for="route-target">Destination <input id="route-target" value="t" size="5"></label><button type="button" id="route-run">Run layered Dijkstra</button></div>
+<output id="route-output" aria-live="polite" role="status"></output>
+<p class="hint">Proof invariant: when Dijkstra finalizes state (v,c), its distance equals the shortest transformed path to that exact state. Compare the two distances at a vertex before merging states.</p>
+</section>
+
+<section id="mst-lab" class="lab" aria-labelledby="mst-title">
+<h2 id="mst-title">Interactive check B: is the light edge mandatory?</h2>
+<p>Try connected or disconnected undirected graphs, change the cut, and compare the unique lightest crossing edge with <strong>all</strong> minimum spanning trees for these small original practice instances. Exhaustive enumeration is a small-instance oracle, not an efficient large-graph algorithm.</p>
+<div class="lab-controls"><label for="mst-preset">Example <select id="mst-preset"><option value="unique">Unique lightest crossing edge</option><option value="tied">Tied crossing edges</option><option value="disconnected">Disconnected counterexample</option></select></label><button id="mst-reset" type="button">Reset selected example</button></div>
+<label for="mst-edges">Undirected edges, one per line: vertex,vertex,integer_weight</label>
+<textarea id="mst-edges" spellcheck="false">a,b,1
+a,c,4
+a,d,5
+b,c,2
+c,d,3
+b,d,6</textarea>
+<div class="lab-controls"><label for="mst-cut">Cut S (comma-separated vertices) <input id="mst-cut" value="a" size="8"></label><button id="mst-run" type="button">Enumerate small-graph MSTs</button></div>
+<output id="mst-output" aria-live="polite" role="status"></output>
+<p class="hint">The cut theorem is conditional on a connected graph. For a unique lightest edge crossing a cut, the exchange proof forces that edge into every MST. A tie blocks that strict proof but does not by itself establish a converse.</p>
+</section>
+
+<section id="cumulative">
+<h2>Optional cumulative and calculation drills</h2>
+<p>The historical sample contains an earlier-course technique, so do not ignore prior material completely. These independently written drills broaden preparation without claiming that any one topic will appear:</p>
+<details class="solution"><summary>Chapter 8: use key structure instead of comparison sorting</summary><div class="sol-inner"><p><strong>Original practice:</strong> Sort n nonnegative integers, each less than n³, for n≥2. Explain an O(n) algorithm.</p><p><strong>Solution:</strong> Represent each integer in base n with at most three digits. Perform stable counting sort from the least significant through the most significant digit; each digit lies in {0,…,n−1}, so each pass costs Θ(n+n)=Θ(n). Three passes yield Θ(n) total. The comparison lower bound does not apply because this is not a comparison-only algorithm. Stability matters.</p></div></details>
+<details class="solution"><summary>Chapter 25: show one Floyd–Warshall intermediate stage</summary><div class="sol-inner"><p><strong>Original practice:</strong> Given p→q of weight 4, q→r of weight −2 and direct p→r of weight 6, compute the new p→r distance when q becomes an allowed intermediate, assuming no negative cycles.</p><p><strong>Solution:</strong> min(6,4+(−2))=2. The inductive claim is that stage k considers exactly paths whose intermediate vertices are among the first k permitted vertices; time O(V³). Negative edges are allowed, negative cycles invalidate the usual finite shortest-path interpretation.</p></div></details>
+<details class="solution"><summary>Chapter 35: distinguish two TSP arguments</summary><div class="sol-inner"><p><strong>Original practice:</strong> Why does doubling an MST and shortcutting prove a 2-approximation only for metric TSP? What is different in the NP-completeness reduction from Hamiltonian cycle?</p><p><strong>Solution:</strong> In a metric, shortcutting repeated vertices never increases cost by the triangle inequality. An MST weighs no more than the optimal tour, so the doubled walk costs at most twice optimum; shortcutting preserves that bound. Chapter 34's separate decision reduction uses edge costs 0 for edges present in the input and 1 otherwise, with threshold 0; it establishes a yes/no equivalence, not an approximation bound.</p></div></details>
+</section>
+
+<section id="score">
+<h2>Self-score and next steps</h2>
+<div class="scoreline"><strong id="score-value" aria-live="polite">0 / 20 rubric items</strong><span>Mark criteria only after checking your own explanation against the solution.</span><button class="clear-button" type="button" id="clear-scores">Reset marks and answers</button></div>
+<p>A strong attempt explains why an algorithm works on <em>every valid input</em>, not merely why it produced one correct example. For missed criteria, return to the lecture-grounded <a href="exam-2.html">comprehensive Exam 2 review</a> and its linked interactives.</p>
+<div class="further">
+<a href="../visualizations/graph-structure.html"><strong>Chapter 22 graph connectivity</strong><br>Low-link, bridges, articulation and Euler tours</a>
+<a href="../visualizations/shortest-paths.html"><strong>Chapter 24 shortest paths</strong><br>Relaxation and algorithm assumptions</a>
+<a href="../visualizations/mst.html"><strong>Chapter 23 spanning trees</strong><br>Cut proofs and Kruskal/Prim</a>
+<a href="../visualizations/hamiltonian-figures.html#fig-3417"><strong>Chapter 34 reduction witness</strong><br>Hamiltonian and vertex-cover correspondence</a>
+</div>
+<p class="fine">Source coverage inspected: ENEE 641 Fall 2026 syllabus; Chapter 22 (slides 9–19), Chapter 23 (3–12), Chapter 24 (4–9), Chapter 25 (2–7), Chapter 34 (10–39), Chapter 35 (2–15), and Chapter 8 (2–10). Historical past exam was examined privately for assessment style only. All published prompts, examples, and explanations are original independent practice.</p>
+</section>
+</main>
+<script type="module">
+import {couponShortestPath,mstCutExplorer} from './exam-2-practice-engine.js';
+const $=id=>document.getElementById(id);
+const routeExamples={
+ 'lecture-inspired':{edges:'s,a,3\na,t,9\ns,b,8\nb,t,4\na,b,1',s:'s',t:'t'},
+ 'zero':{edges:'s,a,0\na,t,5\ns,t,8',s:'s',t:'t'},
+ 'unreachable':{edges:'s,a,1\nb,t,3',s:'s',t:'t'}
+};
+const mstExamples={
+ unique:{edges:'a,b,1\na,c,4\na,d,5\nb,c,2\nc,d,3\nb,d,6',cut:'a'},
+ tied:{edges:'a,b,1\nb,c,1\nc,d,1\nd,a,1\na,c,3\nb,d,3',cut:'a'},
+ disconnected:{edges:'a,b,2\nc,d,1',cut:'a,b'}
+};
+function parseEdges(id){
+ const lines=$(id).value.trim().split(/\r?\n/).filter(line=>line.trim());
+ return lines.map((line,i)=>{const p=line.split(',').map(v=>v.trim());if(p.length!==3||!p[0]||!p[1]||!/^[-+]?\d+$/.test(p[2]))throw new Error('Line '+(i+1)+': expected from,to,integer_weight');return[p[0],p[1],Number(p[2])];});
+}
+const fmt=x=>Number.isFinite(x)?String(x):'∞';
+function loadRoute(){const e=routeExamples[$('route-preset').value];$('route-edges').value=e.edges;$('route-source').value=e.s;$('route-target').value=e.t;runRoute();}
+function runRoute(){
+ try{const edges=parseEdges('route-edges'),start=$('route-source').value.trim(),target=$('route-target').value.trim(),vertices=[...new Set([start,target,...edges.flatMap(([a,b])=>[a,b])])];
+  const r=couponShortestPath(vertices,edges,start,target);
+  const witness=r.path.map(e=>e.from+' → '+e.to+' ('+(e.waived?'COUPON':'cost '+e.weight)+')').join('; ');
+  const states=r.distances.map(x=>x.vertex+': unused '+fmt(x.unused)+', used '+fmt(x.used)).join('\n');
+  const steps=r.trace.map((x,i)=>(i+1)+'. finalize '+x.vertex+' / coupon '+(x.usedCoupon?'used':'unused')+' / cost '+x.distance).join('\n');
+  $('route-output').textContent=(r.cost===null?'No route from '+start+' to '+target+'.':'Best cost: '+r.cost+'\nWitness: '+(witness||'(empty route)'))+'\n\nTwo states per vertex:\n'+states+'\n\nDijkstra finalization trace:\n'+steps;
+ }catch(e){$('route-output').textContent='Input error: '+e.message;}
+}
+function loadMst(){const e=mstExamples[$('mst-preset').value];$('mst-edges').value=e.edges;$('mst-cut').value=e.cut;runMst();}
+function runMst(){
+ try{const edges=parseEdges('mst-edges'),cut=$('mst-cut').value.split(',').map(s=>s.trim()).filter(Boolean),vertices=[...new Set(edges.flatMap(([a,b])=>[a,b]))];
+  const r=mstCutExplorer(vertices,edges,cut);
+  const crossing=r.cutCrossing.map(e=>e.from+'-'+e.to+': '+e.weight).join(', ');
+  const mandatory=r.uniqueLightEdgeId===null?'No unique lightest crossing edge.':(edges[r.uniqueLightEdgeId].slice(0,2).join('-')+' is unique lightest; in every MST: '+r.uniqueLightEdgeInEveryMST);
+  const trees=r.minimumTrees.slice(0,10).map((ids,i)=>(i+1)+'. '+ids.map(id=>edges[id].slice(0,2).join('-')).join(', ')).join('\n');
+  $('mst-output').textContent='Cut S: {'+cut.join(', ')+'}; crossing edges: '+(crossing||'none')+'\nLightest cost: '+fmt(r.lightWeight)+'\n'+mandatory+'\nMinimum spanning tree cost: '+(r.connected?r.minimumCost:'no MST: graph disconnected')+'\nNumber of distinct minimum trees: '+r.minimumTrees.length+(trees?'\nSample minimum trees:\n'+trees:'');
+ }catch(e){$('mst-output').textContent='Input error: '+e.message;}
+}
+function updateScore(){const checks=[...document.querySelectorAll('.rubric-check')],n=checks.filter(c=>c.checked).length;$('score-value').textContent=n+' / '+checks.length+' rubric items';}
+$('route-preset').addEventListener('change',loadRoute);$('route-reset').addEventListener('click',loadRoute);$('route-run').addEventListener('click',runRoute);
+$('mst-preset').addEventListener('change',loadMst);$('mst-reset').addEventListener('click',loadMst);$('mst-run').addEventListener('click',runMst);
+for(const c of document.querySelectorAll('.rubric-check'))c.addEventListener('change',updateScore);
+$('clear-scores').addEventListener('click',()=>{for(const c of document.querySelectorAll('.rubric-check'))c.checked=false;for(const a of document.querySelectorAll('.answer'))a.value='';for(const d of document.querySelectorAll('.question details.solution'))d.open=false;updateScore();});
+loadRoute();loadMst();updateScore();
+</script>
+</body></html>
