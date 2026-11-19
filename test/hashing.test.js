@@ -3,7 +3,7 @@ import {divisionHash,universalHash,chainTable,openAddress} from '../site/visuali
 test('slide 12 universal hash example with p=17,m=6,a=3,b=4,k=8 returns 5',()=>assert.equal(universalHash(8,3,4,17,6),5));
 test('slide 17 linear probe source sequence 89,18,49,58,9',()=>{
  const a=openAddress([89,18,49,58,9],10,'linear');
- assert.deepEqual(a.table,[9,null,null,null,null,null,null,null,18,89]); // Correct values verified independently below
+ assert.deepEqual(a.table,[49,58,9,null,null,null,null,null,18,89]);
  assert.deepEqual(a.traces.map(x=>x.path),[[9],[8],[9,0],[8,9,0,1],[9,0,1,2]]);
 });
 test('quadratic probing may fail to visit all slots',()=>{
