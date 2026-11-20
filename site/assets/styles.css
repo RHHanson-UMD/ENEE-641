@@ -62,3 +62,9 @@
 .chapter-lessons{display:grid;gap:12px;border-top:1px solid var(--line);padding:18px}
 .chapter-lessons .demo-card{margin:0;border-color:var(--line);background:var(--bg)}
 @media(max-width:600px){.chapter-group>summary{padding:17px;align-items:flex-start}.chapter-name{gap:5px;flex-direction:column}.chapter-name strong{font-size:17px}.chapter-lessons{padding:12px}.chapter-count{font-size:11px}}
+
+/* Course-specific owner-provided cover; preserve image aspect ratio and text alternative. */
+.course-cover{margin:0;max-width:100%;min-width:0;align-self:center}
+.course-cover img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:contain;border-radius:18px;border:1px solid var(--line);box-shadow:var(--cardshadow)}
+.course-cover figcaption{margin-top:10px;font-size:12px;line-height:1.5;color:var(--muted);text-align:center}
+@media(max-width:700px){.course-cover{width:min(100%,460px);margin:0 auto}}
