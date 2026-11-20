@@ -1,0 +1,6 @@
+ENEE 641 Learning Lab — public deployment verification marker
+Refresh request: 2026-11-20
+Request tracking: https://github.com/RHHanson-UMD/ENEE-641/issues/46
+Identifier: enee641-pages-refresh-20261120-ops
+Purpose: Verify the deployed GitHub Pages site serves this file after the main-branch push.
+This marker records a requested deployment only. Its existence in the repository does not establish public delivery.
