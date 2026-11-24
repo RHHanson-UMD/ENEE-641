@@ -44,3 +44,7 @@ The actual PowerPoint **GPUS and TPUs 24Nov2026.pptx** was downloaded through th
 - **Slides 10–13**: GPU assembly / PTX / TileLang / vendor discussion and AI-generated text; not treated as independently verified numerical hardware figures or republished as such.
 
 The separate `parallel algorithms first classes2026.ppt` source may be treated in a separate PR; this figure-focused update does not imply that parallel-algorithms content or all slides were actually covered in ENEE 641. All instructional-coverage claims remain conditional pending course verification.
+
+## November 24 parallel algorithms and NPU supplemental work
+
+The complete original source deck `parallel algorithms first classes2026.ppt` was opened. Its introduction expressly says only selected material will be used in ENEE 641. Original interactive preview modules introduce PRAM/EREW-CREW-CRCW, parallel summation and work–depth W,T,p bounds, balanced-tree prefix-sums, and order-preserving compaction (course-source slides 28–45). The scan implementation uses a distinct Blelloch two-pass schedule; it is **not** a literal diagram or pseudocode transcription of the slide algorithm. The output-stationary systolic array is separately labeled independent architectural practice, contrasting with the actual weight-stationary matrix–vector figures in GPU/TPU slides 8–9. Neither lesson is claimed to cover the entire source deck or a confirmed Exam 2 syllabus topic. Independent engine tests and responsive keyboard-accessible original controls accompany both lessons.

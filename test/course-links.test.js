@@ -4,7 +4,7 @@ import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {resolve,dirname} from 'node:path';
 const site=fileURLToPath(new URL('../site/',import.meta.url));
-const targets=['index.html','reviews/exam-1.html','reviews/exam-2.html','reviews/exam-2-practice.html','visualizations/gpu-slide-figures.html'];
+const targets=['index.html','reviews/exam-1.html','reviews/exam-2.html','reviews/exam-2-practice.html','visualizations/gpu-slide-figures.html','visualizations/parallel-algorithms.html','visualizations/systolic-array.html'];
 for (const file of targets) {
  test('All local review/homepage HTML lesson links resolve: '+file,()=>{
   const path=resolve(site,file),html=readFileSync(path,'utf8');
