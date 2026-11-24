@@ -4,12 +4,12 @@ import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {resolve,dirname} from 'node:path';
 const site=fileURLToPath(new URL('../site/',import.meta.url));
-const targets=['index.html','reviews/exam-1.html','reviews/exam-2.html','reviews/exam-2-practice.html'];
+const targets=['index.html','reviews/exam-1.html','reviews/exam-2.html','reviews/exam-2-practice.html','visualizations/gpu-slide-figures.html'];
 for (const file of targets) {
  test('All local review/homepage HTML lesson links resolve: '+file,()=>{
   const path=resolve(site,file),html=readFileSync(path,'utf8');
   const hrefs=[...html.matchAll(/href=["']([^"']+)["']/g)].map(x=>x[1]).filter(x=>x.includes('.html')&&!/^https?:/.test(x));
-  assert.ok(hrefs.length>4);
+  assert.ok(hrefs.length >= (file.startsWith('visualizations/') ? 1 : 5),'Expected relevant local lesson links in '+file);
   for(const href of hrefs) {
     const [local,anchor]=href.split('#');
     const target=resolve(dirname(path),local);
