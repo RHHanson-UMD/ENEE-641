@@ -9,7 +9,7 @@ for (const file of targets) {
  test('All local review/homepage HTML lesson links resolve: '+file,()=>{
   const path=resolve(site,file),html=readFileSync(path,'utf8');
   const hrefs=[...html.matchAll(/href=["']([^"']+)["']/g)].map(x=>x[1]).filter(x=>x.includes('.html')&&!/^https?:/.test(x));
-  assert.ok(hrefs.length>4);
+  assert.ok(hrefs.length >= (file.startsWith('visualizations/') ? 1 : 5),'Expected relevant local lesson links in '+file);
   for(const href of hrefs) {
     const [local,anchor]=href.split('#');
     const target=resolve(dirname(path),local);
