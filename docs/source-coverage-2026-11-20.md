@@ -32,3 +32,15 @@ This is a neutral public **metadata and implementation checkpoint**, not a copy 
 4. Coordinate future private-source migration only through the separate semi-private migration initiative; do not change repository visibility or deployment without its authorization.
 
 This checkpoint does not assert that a source-only upcoming deck is examinable.
+
+## November 24, 2026 — GPU/TPU/NPU figure-specific visual audit
+
+The actual PowerPoint **GPUS and TPUs 24Nov2026.pptx** was downloaded through the course Drive, rendered to images and visually inspected (slides 1–13), not just text-indexed.
+
+- **Slide 3**: instructor's photographed four-block matmul: X, Y, Z arranged in 2×2 subblocks A/B/C/D; exact four block equations are implemented and independently oracle-tested. The original photograph is not copied.
+- **Slide 4**: idealized n=1000 tile comparison b=500 vs b=100, with approximately 500× versus 100× reductions in fetched input elements, given the lecture's capacity assumptions. The pre-existing tiling engine remains separate; its physical cache-capacity caveat is retained.
+- **Slide 6**: historical 90nm energy figures (RISC 125 pJ, load/store 150 pJ, single-precision 15–20 pJ, 32-bit add 7 pJ, 8-bit add 0.2–0.5 pJ). Original numeric comparison only; source cites Qadeer et al. (2015) / licensed Elsevier artwork. Not a modern NPU speed or energy benchmark.
+- **Slides 8–9**: licensed Elsevier Figure 7.13, six fixed weights in a 2×3 MAC structure, three staggered x inputs, two dot-product outputs. The new original illustrative four-tick weight-stationary model is mathematically consistent with this configuration but **not asserted to replicate exact commercial TPU wiring or cycle timing**. No textbook image reused.
+- **Slides 10–13**: GPU assembly / PTX / TileLang / vendor discussion and AI-generated text; not treated as independently verified numerical hardware figures or republished as such.
+
+The separate `parallel algorithms first classes2026.ppt` source may be treated in a separate PR; this figure-focused update does not imply that parallel-algorithms content or all slides were actually covered in ENEE 641. All instructional-coverage claims remain conditional pending course verification.
