@@ -5,7 +5,7 @@ test('output stationary 2x2 systolic model has four products per output',()=>{
  const s=systolicMatmul(A,B);
  assert.deepEqual(s.result,[[19,22],[43,50]]);
  assert.equal(s.ticks,4);assert.equal(s.multiplications,8);
- assert.deepEqual(s.rounds.map(r=>r.products.length),[1,2,3,2]);
+ assert.deepEqual(s.rounds.map(r=>r.products.length),[1,3,3,1]);
  assert.equal(s.rounds[0].products[0].row,0);
 });
 test('independent matrix oracle and exact n cubed products',()=>{
