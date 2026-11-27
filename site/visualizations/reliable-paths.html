@@ -1,0 +1,39 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reliable Paths — ENEE 641 Independent Practice</title><link rel="stylesheet" href="../assets/styles.css"><script src="../assets/course.js" defer></script><style>.lab{max-width:1010px;margin:auto;padding:35px 18px 80px}.lab h1{font:700 clamp(32px,5vw,55px)/1.12 'Space Grotesk',sans-serif}.lab p,.lab li{color:var(--muted);line-height:1.65}.panel{margin:19px 0;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px}.inputs{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:12px 0}.inputs input,.inputs select,.inputs button,.lab textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--ink);padding:10px;font:inherit}.lab textarea{display:block;width:100%;min-height:140px;font-family:ui-monospace,SFMono-Regular,monospace;font-size:14px}.inputs button{cursor:pointer}.inputs input:focus-visible,.inputs select:focus-visible,.inputs button:focus-visible,.lab textarea:focus-visible{outline:3px solid var(--mint)}.result{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--surface2);border-radius:9px;padding:14px;margin:12px 0;color:var(--ink);line-height:1.7}.fine{font-size:12px!important;color:var(--faint)!important}.lab a{text-decoration:underline}@media(max-width:650px){.panel{padding:14px}.lab{padding:24px 13px 60px}}</style></head><body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="container nav-row"><a class="brand" href="../">ENEE 641 / Learning Lab</a><nav class="site-nav"><a href="../reviews/exam-2.html">Exam 2 review</a><a href="../#topics">Chapters</a></nav><div class="nav-actions"><button class="theme-button" id="theme-toggle" aria-label="Toggle theme">☾</button></div></div></header><main class="lab" id="main"><div class="course-eyebrow">NOVEMBER 24 REVIEW / CHAPTER 24 CONCEPT</div><h1>Reliable paths: a Dijkstra transformation</h1><p>This original practice module illustrates a <strong>method discussed in the November 24 review</strong>: turn a product objective into an additive one, or adapt Dijkstra to finalize the largest product. The graph below is independently invented; it is <strong>not a homework question or solution</strong>.</p>
+<section class="panel" id="workbench"><h2>Change probabilities and inspect each finalized vertex</h2><p>For an edge probability r(u,v) between 0 and 1, and independent edge successes, a path's success probability is the <strong>product</strong> of its edge probabilities. A maximally reliable path maximizes that product.</p>
+<div class="inputs"><label for="example">Practice example</label><select id="example"><option value="branch">Competing routes</option><option value="cycle">Directed cycle and tie</option><option value="zero">Reachable, zero reliability</option><option value="disconnected">Unreachable target</option></select><button id="reset" type="button">Reset example</button></div>
+<label for="edges">Edges (directed), one per line: from,to,probability</label><textarea id="edges" spellcheck="false">a,b,0.8
+b,d,0.8
+a,c,0.9
+c,d,0.6
+b,c,0.95</textarea>
+<div class="inputs"><label for="start">Source</label><input id="start" value="a" size="6"><label for="end">Target</label><input id="end" value="d" size="6"><button id="run" type="button">Find best path</button></div>
+<output id="result" class="result" aria-live="polite"></output>
+<h3>Step-by-step selection</h3><ol id="trace"></ol>
+</section>
+<section class="panel"><h2>Why the method works</h2><p><strong>Logarithmic reduction:</strong> When r&gt;0, define w'(u,v)=−ln(r(u,v)). Then w'≥0 and minimizing the transformed sum is equivalent to maximizing the original product:</p><p><strong>−ln(∏r<sub>e</sub>) = Σ(−ln r<sub>e</sub>).</strong> Dijkstra works with these nonnegative transformed weights. A zero-reliability edge corresponds to an infinite transformed weight; handle zero-probability routes separately if reachability matters.</p>
+<p><strong>Direct Dijkstra variant:</strong> Initialize best(source)=1, all other products to 0. Repeatedly finalize the unprocessed vertex with the largest best value, and relax an edge using <strong>best(v) ← max(best(v),best(u)·r(u,v))</strong>. Because every r≤1, extending a path cannot improve its product. This provides the same greedy-finalization argument as ordinary nonnegative Dijkstra.</p>
+<p><strong>Complexity:</strong> This teaching implementation selects vertices by a linear scan and visits each edge in its adjacency list, using O(V²+E) time and O(V+E) storage. A suitable priority queue can reduce selection overhead for large sparse graphs.</p>
+<p><strong>Boundary and counterexample:</strong> Edges with probability 1 are allowed; product 0 is distinct from a structurally unreachable target. The path independence assumption is essential when interpreting the product as a physical probability. Using edge probabilities larger than 1 invalidates the monotonicity argument.</p></section>
+<p class="fine">Source provenance: ENEE 641 November 24, 2026 classroom review discussed the transformation and the direct highest-product formulation. Instructor slides remain authoritative. This page contains only independently authored numbers, graphs and explanatory text; no protected exercise, official solution, transcript or private Drive URL is reproduced.</p></main>
+<script type="module">
+import{reliablePath,logarithmicWeights}from'./path-reliability-engine.js';
+const $=id=>document.getElementById(id);
+const examples={
+ branch:['a,b,0.8\nb,d,0.8\na,c,0.9\nc,d,0.6\nb,c,0.95','a','d'],
+ cycle:['s,a,1\na,b,0.7\nb,a,0.9\na,t,0.6\ns,t,0.5','s','t'],
+ zero:['s,a,0.7\na,t,0','s','t'],
+ disconnected:['s,a,0.7\nb,t,0.8','s','t']
+};
+function reset(){const e=examples[$('example').value];$('edges').value=e[0];$('start').value=e[1];$('end').value=e[2];run()}
+function run(){
+ try{
+  const lines=$('edges').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const edges=lines.map((line,i)=>{const p=line.split(',').map(s=>s.trim());if(p.length!==3||p.some(s=>s==='')||!/^\d+(?:\.\d+)?$/.test(p[2]))throw Error('Line '+(i+1)+' must be from,to,probability');return[p[0],p[1],Number(p[2])];});
+  const source=$('start').value.trim(),target=$('end').value.trim(),vertices=[...new Set([source,target,...edges.flatMap(([u,v])=>[u,v])])];
+  const ans=reliablePath(vertices,edges,source,target),transformed=logarithmicWeights(ans.edges.map(e=>[e.from,e.to,e.reliability]));
+  $('result').textContent=ans.reachable?'Most reliable path: '+ans.path.join(' → ')+'\nPath probability: '+ans.reliability.toPrecision(8)+'\nEdge probabilities: '+ans.edges.map(x=>x.reliability).join(' · ')+'\nTransformed −ln edge weights: '+transformed.map(x=>Number.isFinite(x[2])?x[2].toFixed(4):'∞').join(', '):'Target structurally unreachable from source.';
+  $('trace').replaceChildren(...ans.trace.map((step,i)=>{let li=document.createElement('li');li.textContent='Finalize '+step.vertex+' with best known product '+step.reliability.toPrecision(7);return li}));
+ }catch(e){$('result').textContent='Input error: '+e.message;$('trace').replaceChildren();}
+}
+$('run').onclick=run;$('reset').onclick=reset;$('example').onchange=reset;reset();
+</script></body></html>
