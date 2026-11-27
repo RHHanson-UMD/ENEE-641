@@ -50,6 +50,6 @@ export function logarithmicWeights(edges) {
  if(!Array.isArray(edges))throw new RangeError('Expected edge array');
  return edges.map(([u,v,p])=>{
    if(typeof p!=='number'||!Number.isFinite(p)||p<0||p>1)throw new RangeError('0 ≤ p ≤ 1 required');
-   return [u,v,p===0?Infinity:-Math.log(p)];
+   return [u,v,p===0?Infinity:p===1?0:-Math.log(p)];
  });
 }
